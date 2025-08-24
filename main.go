@@ -1,21 +1,20 @@
-/*
-Copyright © 2025 FABIANO SANTOS FLORENTINO <FABIANORATM@GMAIL.COM>
-*/
 package main
 
 import (
+	"log"
+
 	"github.com/fabianoflorentino/whiterose/cmd"
-	"github.com/joho/godotenv"
+	"github.com/fabianoflorentino/whiterose/utils"
 )
 
 func main() {
 	if err := cmd.Execute(); err != nil {
-		panic("Failed to execute command")
+		log.Fatalf("Failed to execute command: %v", err)
 	}
 }
 
 func init() {
-	if err := godotenv.Load(); err != nil {
-		panic("Failed to load .env file")
+	if err := utils.LoadDotEnv(); err != nil {
+		log.Println("Failed to load .env file")
 	}
 }
