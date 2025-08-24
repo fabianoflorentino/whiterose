@@ -9,9 +9,13 @@ import (
 )
 
 func main() {
-	cmd.Execute()
+	if err := cmd.Execute(); err != nil {
+		panic("Failed to execute command")
+	}
 }
 
 func init() {
-	godotenv.Load()
+	if err := godotenv.Load(); err != nil {
+		panic("Failed to load .env file")
+	}
 }
