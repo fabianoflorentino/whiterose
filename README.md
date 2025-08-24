@@ -47,11 +47,14 @@ Run the setup command to clone all repositories:
 
 ## Environment Variables
 
-Whiterose can use the following environment variables (set in your `.env` file):
+Configure a .env file in your home directory with the following variables:
+
+If you not use a custom settings, create the file with the variables empty,
+the program using the default values.
 
 - `GIT_USER`: Git username for HTTPS authentication
 - `GIT_TOKEN`: Git token/password for HTTPS authentication
-- `SSH_KEY_PATH`: Path to your SSH key directory
+- `SSH_KEY_PATH`: Path to your SSH key directory (default: `$HOME/.ssh`)
 - `SSH_KEY_NAME`: Name of your SSH private key (default: `id_rsa`)
 
 ## License
