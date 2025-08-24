@@ -12,7 +12,7 @@ Whiterose is a CLI tool written in Go for automating the cloning and setup of mu
 
 ## Requirements
 
-- Go 1.18+
+- Go 1.25+
 - SSH keys (for cloning via SSH)
 - `.env` file in your home directory with credentials (optional)
 
