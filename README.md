@@ -43,28 +43,34 @@ Edit `repos.json`:
 ]
 ```
 
-### Clone repositories
-
 ```sh
-./whiterose setup
-```
+Whiterose is a command-line tool for automating the cloning and setup of multiple Git repositories.
+It streamlines the process of preparing development environments, especially for teams working with several repositories.
 
-### Validate environment prerequisites
+Features:
+- Clone repositories using HTTPS or SSH
+- Automatically checkout the development branch if available
+- Create and checkout a user-specific branch if development does not exist
+- Load environment variables from a .env file
+- Configure repositories via a JSON file
 
-```sh
-./whiterose pre-req --check
-```
+Example usage:
+  whiterose setup
 
-List all available applications for validation:
+Usage:
+  whiterose [command]
 
-```sh
-./whiterose pre-req --list
-```
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  docker      Automates Docker operations, such as checking and building images.
+  help        Help about any command
+  pre-req     Validate and list required applications for the environment.
+  setup       A brief description of your command
 
-Validate specific applications:
+Flags:
+  -h, --help   help for whiterose
 
-```sh
-./whiterose pre-req --apps go,git
+Use "whiterose [command] --help" for more information about a command.
 ```
 
 ## Environment Variables
@@ -75,6 +81,8 @@ Create a `.env` file in your home directory (required):
 - `GIT_TOKEN`: Git token/password for HTTPS authentication
 - `SSH_KEY_PATH`: Path to your SSH key directory (default: `$HOME/.ssh`)
 - `SSH_KEY_NAME`: Name of your SSH private key (default: `id_rsa`)
+- `IMAGE_NAME`: Name of the Docker image to build (default: `my_app:latest`)
+- `DOCKERFILE_PATH`: Path to the Dockerfile (default: `$PWD/Dockerfile`)
 
 If not set, default values are used.
 
@@ -85,8 +93,38 @@ If not set, default values are used.
 - `git/`: Git operations (clone, checkout)
 - `prereq/`: Environment validation utilities
 - `setup/`: Setup logic for cloning repositories
+- `docker/`: Docker-related utilities
 - `utils/`: Helpers for environment variables and JSON parsing
 - `repos.json`: List of repositories to clone
+
+```sh
+.
+├── cmd
+│   ├── docker.go
+│   ├── preReq.go
+│   ├── root.go
+│   └── setup.go
+├── CONTRIBUTING.md
+├── docker
+│   └── docker.go
+├── Dockerfile
+├── git
+│   └── git.go
+├── go.mod
+├── go.sum
+├── LICENSE
+├── main.go
+├── prereq
+│   └── pre_req.go
+├── README.md
+├── repos.json
+├── setup
+│   └── setup.go
+└── utils
+    ├── dot_env.go
+    ├── get_env_or_default.go
+    └── json.go
+```
 
 ## License
 
