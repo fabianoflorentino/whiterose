@@ -82,6 +82,7 @@ Create a `.env` file in your home directory (required):
 - `SSH_KEY_PATH`: Path to your SSH key directory (default: `$HOME/.ssh`)
 - `SSH_KEY_NAME`: Name of your SSH private key (default: `id_rsa`)
 - `IMAGE_NAME`: Name of the Docker image to build (default: `my_app:latest`)
+- `IMAGE_VERSION`: Version of the Docker image to build (default: `latest`)
 - `DOCKERFILE_PATH`: Path to the Dockerfile (default: `$PWD/Dockerfile`)
 
 If not set, default values are used.
