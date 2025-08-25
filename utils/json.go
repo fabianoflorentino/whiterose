@@ -17,6 +17,10 @@ type RepoInfo struct {
 	Directory string `json:"directory"`
 }
 
+type ConfigFile struct {
+	Repositories []RepoInfo `json:"repositories"`
+}
+
 func FetchReposFromJSON(file string) ([]RepoInfo, error) {
 	f, err := os.Open(file)
 	if err != nil {
@@ -25,10 +29,11 @@ func FetchReposFromJSON(file string) ([]RepoInfo, error) {
 	}
 	defer f.Close()
 
-	var repos []RepoInfo
-	if err := json.NewDecoder(f).Decode(&repos); err != nil {
+	var rf ConfigFile
+	if err := json.NewDecoder(f).Decode(&rf); err != nil {
 		log.Fatalf("failed to decode JSON: %v", err)
+		return nil, err
 	}
 
-	return repos, nil
+	return rf.Repositories, nil
 }
