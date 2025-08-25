@@ -8,24 +8,19 @@ import (
 )
 
 func GitCloneRepository() {
-	repos, err := utils.FetchReposFromJSON("./repos.json")
+	repos, err := git.LoadRepositoriesFromFile("./config.json")
 	if err != nil {
-		log.Fatalf("failed to fetch repositories: %v", err)
+		log.Fatalf("failed to load repositories: %v", err)
 	}
 
-	var opts []git.GitCloneOptions
-	for _, r := range repos {
-		opts = append(opts, git.GitCloneOptions{
-			URL:        r.URL,
-			Directory:  r.Directory,
-			Username:   utils.GetEnvOrDefault("GIT_USER", ""),
-			Password:   utils.GetEnvOrDefault("GIT_TOKEN", ""),
-			SSHKeyPath: utils.GetEnvOrDefault("SSH_KEY_PATH", ""),
-			SSHKeyName: utils.GetEnvOrDefault("SSH_KEY_NAME", "id_rsa"),
-		})
+	for i := range repos {
+		repos[i].Username = utils.GetEnvOrDefault("GIT_USER", "")
+		repos[i].Password = utils.GetEnvOrDefault("GIT_TOKEN", "")
+		repos[i].SSHKeyPath = utils.GetEnvOrDefault("SSH_KEY_PATH", "")
+		repos[i].SSHKeyName = utils.GetEnvOrDefault("SSH_KEY_NAME", "id_rsa")
 	}
 
-	if err := git.FetchRepositories(opts); err != nil {
+	if err := git.FetchRepositories(repos); err != nil {
 		log.Fatalf("failed to fetch repositories: %v", err)
 	}
 }
