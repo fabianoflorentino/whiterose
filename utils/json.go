@@ -43,7 +43,7 @@ func FetchReposFromJSON(file string) ([]RepoInfo, error) {
 		log.Fatalf("failed to open file: %v, %s", err, repoFile)
 		return nil, err
 	}
-	defer f.Close()
+	defer f.Close().Error()
 
 	var rf ConfigFile
 	if err := json.NewDecoder(f).Decode(&rf); err != nil {

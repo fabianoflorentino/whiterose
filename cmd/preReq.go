@@ -4,6 +4,8 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/fabianoflorentino/whiterose/prereq"
 	"github.com/spf13/cobra"
 )
@@ -28,7 +30,9 @@ all required applications or validating the presence of specific ones.`,
 		case cmd.Flags().Changed("apps"):
 			app.ValidateSpecificApps(validApps)
 		case len(args) == 0:
-			cmd.Help()
+			if err := cmd.Help(); err != nil {
+				fmt.Println(err)
+			}
 		default:
 		}
 	},

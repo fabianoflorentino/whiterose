@@ -26,7 +26,9 @@ Docker images using environment variables and custom build arguments.`,
 		case cmd.Flags().Changed("build"):
 			buildDockerImage()
 		case len(args) == 0:
-			cmd.Help()
+			if err := cmd.Help(); err != nil {
+				fmt.Println(err)
+			}
 		}
 	},
 }
