@@ -50,7 +50,7 @@ func init() {
 
 // isDockerFile checks if a Dockerfile exists in the current directory
 func isDockerFile() {
-	workDir := os.Getenv("PWD")
+	workDir := utils.GetEnvOrDefault("DOCKERFILE_PATH", os.Getenv("PWD"))
 	d := docker.NewDockerManager(workDir)
 
 	dockerfilePath, err := d.DetectDockerFile()
