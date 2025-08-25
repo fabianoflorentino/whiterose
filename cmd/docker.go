@@ -64,18 +64,18 @@ func isDockerFile() {
 
 // buildDockerImage builds a Docker image from the Dockerfile
 func buildDockerImage() {
-	workDir := os.Getenv("PWD")
+	workDir := utils.GetEnvOrDefault("DOCKERFILE_PATH", os.Getenv("PWD"))
+	imageName := utils.GetEnvOrDefault("IMAGE_NAME", "my_app:latest")
+	buildArgs := map[string]string{
+		"IMAGE_VERSION": utils.GetEnvOrDefault("IMAGE_VERSION", "latest"),
+	}
+
 	d := docker.NewDockerManager(workDir)
 
 	dockerfilePath, err := d.DetectDockerFile()
 	if err != nil {
 		fmt.Println(err)
 		return
-	}
-
-	imageName := utils.GetEnvOrDefault("IMAGE_NAME", "my_app:latest")
-	buildArgs := map[string]string{
-		"IMAGE_VERSION": "v0.0.1",
 	}
 
 	if err := d.BuildDockerImage(dockerfilePath[0], imageName, buildArgs); err != nil {
