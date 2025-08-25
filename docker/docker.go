@@ -1,3 +1,21 @@
+// DockerManager provides methods to manage Docker operations within a specified working directory.
+// It supports detecting Dockerfiles and building Docker images using specified build arguments.
+//
+// NewDockerManager(workDir string) *DockerManager:
+//
+//	Creates a new DockerManager instance for the given working directory.
+//
+// DetectDockerFile() ([]string, error):
+//
+//	Recursively searches for Dockerfiles in the working directory.
+//	Returns a slice of paths to found Dockerfiles or an error if none are found.
+//
+// BuildDockerImage(dockerfilePath, imageName string, buildArgs map[string]string) error:
+//
+//	Builds a Docker image using the specified Dockerfile and image name.
+//	Accepts build arguments as a map.
+//	Outputs build progress and duration to stdout/stderr.
+//	Returns an error if the build fails.
 package docker
 
 import (
@@ -13,10 +31,12 @@ type DockerManager struct {
 	workDir string
 }
 
+// NewDockerManager creates a new DockerManager instance for the given working directory.
 func NewDockerManager(workDir string) *DockerManager {
 	return &DockerManager{workDir: workDir}
 }
 
+// DetectDockerFile searches for Dockerfiles in the working directory.
 func (d *DockerManager) DetectDockerFile() ([]string, error) {
 	var dockerfiles []string
 
@@ -45,6 +65,7 @@ func (d *DockerManager) DetectDockerFile() ([]string, error) {
 	return dockerfiles, nil
 }
 
+// BuildDockerImage builds a Docker image using the specified Dockerfile and image name.
 func (d *DockerManager) BuildDockerImage(dockerfilePath, imageName string, buildArgs map[string]string) error {
 	fmt.Printf("Building Docker image '%s' from Dockerfile at '%s'\n", imageName, dockerfilePath)
 

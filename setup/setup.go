@@ -1,3 +1,7 @@
+// GitCloneRepository loads repository configurations from a JSON file,
+// sets authentication credentials and SSH key information from environment variables,
+// and fetches/clones the repositories. If any error occurs during loading or fetching,
+// the function logs the error and terminates the application.
 package setup
 
 import (
@@ -7,6 +11,10 @@ import (
 	"github.com/fabianoflorentino/whiterose/utils"
 )
 
+// GitCloneRepository loads repository configurations from a JSON file,
+// sets authentication credentials and SSH key information from environment variables,
+// and fetches/clones the repositories. If any error occurs during loading or fetching,
+// the function logs the error and terminates the application.
 func GitCloneRepository() {
 	repos, err := git.LoadRepositoriesFromFile("./config.json")
 	if err != nil {

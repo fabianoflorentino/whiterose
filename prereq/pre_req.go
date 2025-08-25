@@ -91,7 +91,7 @@ func (av *AppValidator) ValidateApps() {
 		installed, version, err := av.checkAppInstalled(app)
 
 		if installed && err == nil {
-			fmt.Printf("💾  %s\n", app.Name)
+			fmt.Printf("💾 %s\n", app.Name)
 			fmt.Printf("✅ Status: INSTALLED\n")
 			fmt.Printf("📦 Version: %s\n", version)
 			fmt.Printf("🎯 Recommended: %s\n", app.RecommendedVersion)

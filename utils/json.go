@@ -1,3 +1,18 @@
+// Package utils provides utility functions for handling JSON configuration files.
+//
+// This file defines structures and functions for reading repository information from a JSON file.
+//
+// Constants:
+//   - repoFile: Contains a reference URL for usage instructions.
+//
+// Types:
+//   - RepoInfo: Represents a repository with its URL and local directory.
+//   - ConfigFile: Represents the configuration file structure containing a list of repositories.
+//
+// Functions:
+//   - FetchReposFromJSON(file string) ([]RepoInfo, error):
+//     Reads a JSON file specified by 'file', decodes its contents into a ConfigFile struct,
+//     and returns the list of repositories. Logs fatal errors if the file cannot be opened or decoded.
 package utils
 
 import (
@@ -21,6 +36,7 @@ type ConfigFile struct {
 	Repositories []RepoInfo `json:"repositories"`
 }
 
+// FetchReposFromJSON reads a JSON file specified by 'file', decodes its contents into a ConfigFile struct,
 func FetchReposFromJSON(file string) ([]RepoInfo, error) {
 	f, err := os.Open(file)
 	if err != nil {

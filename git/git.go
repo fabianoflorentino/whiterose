@@ -1,3 +1,14 @@
+// Package git provides utilities for cloning and managing Git repositories,
+// supporting both HTTPS and SSH authentication methods.
+//
+// Types:
+//   - GitCloneOptions: Options for cloning a Git repository, including URL, directory, credentials, and SSH key information.
+//
+// Functions:
+//   - FetchRepositories: Clones multiple repositories based on provided options.
+//   - LoadRepositoriesFromFile: Loads repository clone options from a JSON file.
+//   - clone: Clones a single repository and checks out the 'development' branch or creates a user-specific branch if not present.
+//   - createSSHAuth: Creates SSH authentication using a private key file, with support for default key locations and names.
 package git
 
 import (
@@ -22,6 +33,7 @@ type GitCloneOptions struct {
 	SSHKeyName string
 }
 
+// FetchRepositories clones multiple repositories based on provided options.
 func FetchRepositories(repos []GitCloneOptions) error {
 	for _, opts := range repos {
 		fmt.Printf("Cloning %s into %s...\n", opts.URL, opts.Directory)
@@ -50,6 +62,7 @@ func LoadRepositoriesFromFile(file string) ([]GitCloneOptions, error) {
 	return opts, nil
 }
 
+// clone clones a single Git repository into the specified directory.
 func clone(opts GitCloneOptions) error {
 	if _, err := os.Stat(opts.Directory); err == nil {
 		return fmt.Errorf("directory %s already exists", opts.Directory)
@@ -107,6 +120,7 @@ func clone(opts GitCloneOptions) error {
 	return nil
 }
 
+// createSSHAuth creates SSH authentication using a private key file, with support for default key locations and names.
 func createSSHAuth(keyPath string) (*ssh.PublicKeys, error) {
 	if keyPath == "" {
 		homeDir, err := os.UserHomeDir()
