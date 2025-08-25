@@ -33,6 +33,23 @@ func FetchRepositories(repos []GitCloneOptions) error {
 	return nil
 }
 
+// LoadRepositoriesFromFile loads repositories from repos.json and returns a slice of GitCloneOptions
+func LoadRepositoriesFromFile(file string) ([]GitCloneOptions, error) {
+	repoInfos, err := utils.FetchReposFromJSON(file)
+	if err != nil {
+		return nil, err
+	}
+	var opts []GitCloneOptions
+	for _, r := range repoInfos {
+		opts = append(opts, GitCloneOptions{
+			URL:       r.URL,
+			Directory: r.Directory,
+			// Username, Password, SSHKeyPath, SSHKeyName can be set later or via env
+		})
+	}
+	return opts, nil
+}
+
 func clone(opts GitCloneOptions) error {
 	if _, err := os.Stat(opts.Directory); err == nil {
 		return fmt.Errorf("directory %s already exists", opts.Directory)
