@@ -29,17 +29,12 @@
 package prereq
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
 	"runtime"
 	"strings"
-)
-
-const (
-	gitVersion    string = "2.51.0"
-	dockerVersion string = "28.3.3"
-	jqVersion     string = "1.8.1"
-	yqVersion     string = "v4.47.1"
 )
 
 // AppInfo holds information about a command-line application.
@@ -57,67 +52,28 @@ type AppValidator struct {
 	os   string
 }
 
+type appFile struct {
+	Applications []AppInfo `json:"applications"`
+}
+
 // NewAppValidator constructs a new AppValidator pre-populated with common development tools.
 func NewAppValidator() *AppValidator {
+	apps := []AppInfo{}
+	file, err := os.Open("config.json")
+	if err == nil {
+		defer file.Close()
+		var af appFile
+		if err := json.NewDecoder(file).Decode(&af); err == nil {
+			apps = af.Applications
+		}
+	}
+	if len(apps) == 0 {
+		fmt.Printf("No applications found in config.json, using defaults.\n")
+	}
+
 	return &AppValidator{
-		os: runtime.GOOS,
-		apps: []AppInfo{
-			{
-				Name:               "Go",
-				Command:            "go",
-				VersionFlag:        "version",
-				RecommendedVersion: "1.25.0",
-				InstallInstructions: map[string]string{
-					"linux":   "sudo [apt/apt-get] install golang (Ubuntu/Debian) or sudo [dnf/yum] install golang (RHEL/CentOS)",
-					"darwin":  "brew install go",
-					"windows": "choco install golang",
-				},
-			},
-			{
-				Name:               "Git",
-				Command:            "git",
-				VersionFlag:        "--version",
-				RecommendedVersion: gitVersion,
-				InstallInstructions: map[string]string{
-					"linux":   "sudo [apt/apt-get] install git (Ubuntu/Debian) or sudo [dnf/yum] install git (RHEL/CentOS)",
-					"darwin":  "brew install git",
-					"windows": "download: https://git-scm.com/download/win",
-				},
-			},
-			{
-				Name:               "Docker",
-				Command:            "docker",
-				VersionFlag:        "--version",
-				RecommendedVersion: dockerVersion,
-				InstallInstructions: map[string]string{
-					"linux":   "sudo [apt/apt-get] install docker (Ubuntu/Debian) or sudo [dnf/yum] install docker (RHEL/CentOS)",
-					"darwin":  "download: https://docs.docker.com/desktop/setup/install/mac-install/",
-					"windows": "download: https://docs.docker.com/desktop/windows/install/",
-				},
-			},
-			{
-				Name:               "jq",
-				Command:            "jq",
-				VersionFlag:        "--version",
-				RecommendedVersion: jqVersion,
-				InstallInstructions: map[string]string{
-					"linux":   "sudo [apt/apt-get] install jq (Ubuntu/Debian) or sudo [dnf/yum] install jq (RHEL/CentOS)",
-					"darwin":  "brew install jq",
-					"windows": "download: https://github.com/stedolan/jq/releases",
-				},
-			},
-			{
-				Name:               "yq",
-				Command:            "yq",
-				VersionFlag:        "--version",
-				RecommendedVersion: yqVersion,
-				InstallInstructions: map[string]string{
-					"linux":   "sudo [apt/apt-get] install yq (Ubuntu/Debian) or sudo [dnf/yum] install yq (RHEL/CentOS)",
-					"darwin":  "brew install yq",
-					"windows": "download: https://github.com/mikefarah/yq/releases",
-				},
-			},
-		},
+		os:   runtime.GOOS,
+		apps: apps,
 	}
 }
 
