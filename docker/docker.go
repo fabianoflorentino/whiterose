@@ -42,6 +42,7 @@ func NewDockerManager(workDir string) *DockerManager {
 func (d *DockerManager) DetectDockerFile() ([]string, error) {
 	var dockerfiles []string
 
+	// Walk the file tree to find Dockerfiles
 	err := filepath.Walk(d.workDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
