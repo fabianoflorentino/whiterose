@@ -25,6 +25,8 @@ Docker images using environment variables and custom build arguments.`,
 			isDockerFile()
 		case cmd.Flags().Changed("build"):
 			buildDockerImage()
+		case cmd.Flags().Changed("delete"):
+			deleteDockerImage()
 		case len(args) == 0:
 			if err := cmd.Help(); err != nil {
 				fmt.Println(err)
@@ -38,6 +40,7 @@ func init() {
 
 	dockerCmd.Flags().BoolP("file", "f", false, "Check if Dockerfile exists in the current directory")
 	dockerCmd.Flags().BoolP("build", "b", false, "Build Docker image from Dockerfile")
+	dockerCmd.Flags().BoolP("delete", "d", false, "Delete Docker image")
 
 	// Here you will define your flags and configuration settings.
 
@@ -81,6 +84,18 @@ func buildDockerImage() {
 	}
 
 	if err := d.BuildDockerImage(dockerfilePath[0], imageName, buildArgs); err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
+func deleteDockerImage() {
+	workDir := utils.GetEnvOrDefault("DOCKERFILE_PATH", os.Getenv("PWD"))
+	imageName := utils.GetEnvOrDefault("IMAGE_NAME", "my_app:latest")
+
+	d := docker.NewDockerManager(workDir)
+
+	if err := d.DeleteDockerImage(imageName); err != nil {
 		fmt.Println(err)
 		return
 	}
