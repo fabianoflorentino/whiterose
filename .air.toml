@@ -1,0 +1,9 @@
+[build]
+  root = "/whiterose"
+  bin = "/usr/local/bin/whiterose"
+  cmd = 'GOFLAGS="-trimpath" CGO_DISABLED=1 GOARCH=amd64 go build -ldflags="-s -w" -o /usr/local/bin/whiterose .'
+  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  exclude_file = [".md"]
+  exclude_regex = ["_test.go"]
+  poll = true
+  poll_interval = 60
