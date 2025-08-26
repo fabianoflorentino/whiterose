@@ -25,6 +25,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/fabianoflorentino/whiterose/utils"
 )
 
 type DockerManager struct {
@@ -78,7 +80,9 @@ func (d *DockerManager) BuildDockerImage(dockerfilePath, imageName string, build
 		args = append(args, "--build-arg", fmt.Sprintf("%s=%s", key, value))
 	}
 
-	args = append(args, "--progress=plain", "--no-cache")
+	var build_target string = utils.GetEnvOrDefault("BUILD_TARGET", "development")
+
+	args = append(args, "--progress=plain", "--no-cache", "--target", build_target)
 	args = append(args, "-t", imageName)
 	args = append(args, "-f", dockerfilePath)
 	args = append(args, buildContext)
