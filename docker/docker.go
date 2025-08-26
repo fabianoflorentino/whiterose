@@ -107,3 +107,25 @@ func (d *DockerManager) BuildDockerImage(dockerfilePath, imageName string, build
 	fmt.Printf("Docker image '%s' built successfully in %v\n", imageName, duration)
 	return nil
 }
+
+func (d *DockerManager) DeleteDockerImage(imageName string) error {
+	fmt.Printf("Deleting Docker image '%s'\n", imageName)
+
+	cmd := exec.Command("docker", "rmi", imageName)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	fmt.Printf("Running command: %s\n", cmd.String())
+
+	startTime := time.Now()
+	err := cmd.Run()
+	duration := time.Since(startTime)
+
+	if err != nil {
+		fmt.Printf("Error deleting Docker image: %v\n", err)
+		return err
+	}
+
+	fmt.Printf("Docker image '%s' deleted successfully in %v\n", imageName, duration)
+	return nil
+}
