@@ -1,14 +1,27 @@
-FROM golang:alpine3.22 AS build
+FROM golang:alpine3.22 AS base
 
-WORKDIR /app
+WORKDIR /whiterose
 
 COPY . .
 
-RUN GOFLAGS="-trimpath" CGO_DISABLED=1 GOARCH=amd64 go build -ldflags="-s -w" -o /usr/local/bin/whiterose .
+RUN apk update -y --no-cache \
+  && apk upgrade -y --no-cache \
+  && go mod download \
+  && GOFLAGS="-trimpath" CGO_DISABLED=1 GOARCH=amd64 go build -ldflags="-s -w" -o /usr/local/bin/whiterose .
 
-FROM gcr.io/distroless/static:nonroot
+FROM base AS development
 
-COPY --from=build /usr/local/bin/whiterose /usr/local/bin/whiterose
+RUN go install github.com/air-verse/air@latest
+
+COPY --from=base /whiterose/.env.example /root/.env
+
+ENTRYPOINT [ "/go/bin/air" ]
+CMD [ "-c", "/whiterose/.air.toml" ]
+
+
+FROM gcr.io/distroless/static:nonroot AS production
+
+COPY --from=base /usr/local/bin/whiterose /usr/local/bin/whiterose
 
 USER nonroot:nonroot
 
