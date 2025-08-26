@@ -61,7 +61,11 @@ func NewAppValidator() *AppValidator {
 	apps := []AppInfo{}
 	file, err := os.Open("config.json")
 	if err == nil {
-		defer file.Close().Error()
+		defer func() {
+			if cerr := file.Close(); cerr != nil { // check if closing the file returns an error
+				fmt.Fprintf(os.Stderr, "Error closing config.json: %v\n", cerr)
+			}
+		}()
 		var af appFile
 		if err := json.NewDecoder(file).Decode(&af); err == nil {
 			apps = af.Applications
