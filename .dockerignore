@@ -1,0 +1,42 @@
+# Ignore Docker-related files and directories
+.dockerignore
+Dockerfile
+docker-compose.yml
+docker-compose.yaml
+
+# Ignore build output
+bin/
+build/
+dist/
+
+# Ignore Go build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Ignore dependency directories
+vendor/
+node_modules/
+
+# Ignore editor and OS files
+*.swp
+*.swo
+*.tmp
+*.log
+*.json
+*.bak
+*.DS_Store
+.idea/
+.vscode/
+.env
+*.md
+.tool-versions
+
+LICENSE
+.git
+.github
+.gitignore
+.env.example
