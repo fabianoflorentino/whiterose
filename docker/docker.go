@@ -82,7 +82,7 @@ func (d *DockerManager) BuildDockerImage(dockerfilePath, imageName string, build
 		args = append(args, "--build-arg", fmt.Sprintf("%s=%s", key, value))
 	}
 
-	var build_target string = utils.GetEnvOrDefault("BUILD_TARGET", "development")
+	var build_target = utils.GetEnvOrDefault("BUILD_TARGET", "development")
 
 	args = append(args, "--progress=plain", "--no-cache", "--target", build_target)
 	args = append(args, "-t", imageName)
