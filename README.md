@@ -65,6 +65,40 @@ Example:
 }
 ```
 
+```sh
+./whiterose
+```
+
+```sh
+Whiterose is a command-line tool for automating the cloning and setup of multiple Git repositories.
+It streamlines the process of preparing development environments, especially for teams working with several repositories.
+
+Features:
+- Clone repositories using HTTPS or SSH
+- Automatically checkout the development branch if available
+- Create and checkout a user-specific branch if development does not exist
+- Load environment variables from a .env file
+- Configure repositories via a JSON file
+
+Example usage:
+  whiterose setup
+
+Usage:
+  whiterose [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  docker      Automates Docker operations, such as checking and building images.
+  help        Help about any command
+  pre-req     Validate and list required applications for the environment.
+  setup       A brief description of your command
+
+Flags:
+  -h, --help   help for whiterose
+
+Use "whiterose [command] --help" for more information about a command.
+```
+
 ### Run setup
 
 ```sh
