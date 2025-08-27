@@ -6,6 +6,7 @@ package setup
 
 import (
 	"log"
+	"os"
 
 	"github.com/fabianoflorentino/whiterose/git"
 	"github.com/fabianoflorentino/whiterose/utils"
@@ -16,7 +17,8 @@ import (
 // and fetches/clones the repositories. If any error occurs during loading or fetching,
 // the function logs the error and terminates the application.
 func GitCloneRepository() {
-	repos, err := git.LoadRepositoriesFromFile("./config.json")
+	cfg := utils.GetEnvOrDefault("CONFIG_FILE", os.Getenv("HOME")+"/.config.json")
+	repos, err := git.LoadRepositoriesFromFile(cfg)
 	if err != nil {
 		log.Fatalf("failed to load repositories: %v", err)
 	}
