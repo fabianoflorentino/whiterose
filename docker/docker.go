@@ -129,3 +129,20 @@ func (d *DockerManager) DeleteDockerImage(imageName string) error {
 	fmt.Printf("Docker image '%s' deleted successfully in %v\n", imageName, duration)
 	return nil
 }
+
+func (d *DockerManager) ListDockerImages(imageName string) error {
+	cmd := exec.Command("docker", "image", "list", imageName, "--format", "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.Size}}")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	fmt.Printf("Running command: %s\n", cmd.String())
+
+	err := cmd.Run()
+
+	if err != nil {
+		fmt.Printf("Error listing Docker images: %v\n", err)
+		return err
+	}
+
+	return nil
+}
