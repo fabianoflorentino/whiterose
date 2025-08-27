@@ -34,7 +34,12 @@ go build -o whiterose main.go
 
 ### Configure repositories
 
-Edit `config.json`:
+Edit `.config.json`:
+
+- Add your Git repository URLs and directory names.
+- Add any required applications for your projects.
+
+Example:
 
 ```json
 {
