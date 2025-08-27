@@ -16,7 +16,8 @@ Whiterose is a CLI tool written in Go that automates the setup of multiple Git r
 
 - Go 1.25+
 - SSH keys (for cloning via SSH)
-- `.env` file in your home directory (optional, for credentials)
+- `.env` file in your home directory (required, for environment configuration)
+- `.config.json` file in your home directory (required, for repository configuration and applications validation)
 - Linux, macOS, or Windows
 
 ## Installation
@@ -78,10 +79,11 @@ Use `whiterose [command] --help` for more information about each command.
 
 ## Environment Variables
 
-Create a `.env` file in your home directory (optional):
+Create a `.env` file in your home directory (required):
 
 - `GIT_USER`: Git username for HTTPS authentication
 - `GIT_TOKEN`: Git token/password for HTTPS authentication
+- `CONFIG_FILE`: Path to the configuration file (default: `$HOME/.config.json`)
 - `SSH_KEY_PATH`: Path to your SSH key directory (default: `$HOME/.ssh`)
 - `SSH_KEY_NAME`: Name of your SSH private key (default: `id_rsa`)
 - `IMAGE_NAME`: Name of the Docker image to build (default: `my_app:latest`)
