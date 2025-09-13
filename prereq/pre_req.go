@@ -29,12 +29,12 @@
 package prereq
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+
+	"github.com/fabianoflorentino/whiterose/utils"
 )
 
 // AppInfo holds information about a command-line application.
@@ -48,42 +48,23 @@ type AppInfo struct {
 
 // AppValidator manages a list of applications to validate.
 type AppValidator struct {
-	apps []AppInfo
+	apps []utils.AppInfo
 	os   string
-}
-
-// appFile is used to parse the JSON configuration file.
-type appFile struct {
-	Applications []AppInfo `json:"applications"`
 }
 
 // NewAppValidator constructs a new AppValidator pre-populated with common development tools.
 func NewAppValidator() *AppValidator {
-	apps := []AppInfo{}
-	file, err := os.Open(".config.json")
-	if err == nil {
-		defer func() {
-			if cerr := file.Close(); cerr != nil { // check if closing the file returns an error
-				fmt.Fprintf(os.Stderr, "Error closing .config.json: %v\n", cerr)
-			}
-		}()
-		var af appFile
-		if err := json.NewDecoder(file).Decode(&af); err == nil {
-			apps = af.Applications
-		}
-	}
-	if len(apps) == 0 {
-		fmt.Printf("No applications found in config.json, using defaults.\n")
+	apps, err := utils.FetchAppsInfoFromJSON(".config.json")
+	if err != nil {
+		fmt.Printf("Error fetching applications: %v\n", err)
+		return &AppValidator{os: runtime.GOOS, apps: apps}
 	}
 
-	return &AppValidator{
-		os:   runtime.GOOS,
-		apps: apps,
-	}
+	return &AppValidator{os: runtime.GOOS, apps: apps}
 }
 
 // AddApp adds a custom application to the validator.
-func (av *AppValidator) AddApp(app AppInfo) {
+func (av *AppValidator) AddApp(app utils.AppInfo) {
 	av.apps = append(av.apps, app)
 }
 
@@ -121,7 +102,7 @@ func (av *AppValidator) ValidateApps() {
 // It accepts a slice of application names or commands to validate.
 // If an application is not found in the predefined list, it is skipped with a message.
 func (av *AppValidator) ValidateSpecificApps(appNames []string) {
-	var appsToValidate []AppInfo
+	var appsToValidate []utils.AppInfo
 
 	for _, name := range appNames {
 		for _, app := range av.apps {
@@ -169,7 +150,7 @@ func (av *AppValidator) getOSName() string {
 }
 
 // checkAppInstalled checks if a command-line application is installed and retrieves its version.
-func (av *AppValidator) checkAppInstalled(app AppInfo) (bool, string, error) {
+func (av *AppValidator) checkAppInstalled(app utils.AppInfo) (bool, string, error) {
 	cmd := exec.Command(app.Command, app.VersionFlag)
 	output, err := cmd.Output()
 	if err != nil {
