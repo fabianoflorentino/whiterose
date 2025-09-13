@@ -7,6 +7,7 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -24,13 +25,11 @@ https://github.com/fabianoflorentino/whiterose/blob/main/README.md#environment-v
 func LoadDotEnv() error {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		panic("Failed to get home directory")
+		return fmt.Errorf("failed to get home directory: %v", err)
 	}
 
-	dotEnvFile := homeDir + "/.env"
-
-	if err := godotenv.Load(dotEnvFile); err != nil {
-		log.Fatalf("Failed to load .env file: %v, %s", err, envVars)
+	if err := godotenv.Load(homeDir + "/.env"); err != nil {
+		log.Fatalf("failed to load .env file: %v, %s", err, envVars)
 		os.Exit(125)
 	}
 
