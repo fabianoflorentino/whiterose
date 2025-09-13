@@ -52,6 +52,7 @@ type AppValidator struct {
 	os   string
 }
 
+// appFile is used to parse the JSON configuration file.
 type appFile struct {
 	Applications []AppInfo `json:"applications"`
 }
