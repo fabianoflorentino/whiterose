@@ -35,3 +35,24 @@ func LoadDotEnv() error {
 
 	return nil
 }
+
+// LoadDotConfigJSON loads a .config.json file from the user's home directory.
+// It returns the file path as a string and an error if the file cannot be opened.
+func LoadDotConfigJSON(file string) (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("failed to get home directory: %v", err)
+	}
+
+	f, err := os.Open(homeDir + "/" + file)
+	if err != nil {
+		return "", fmt.Errorf("failed to open file: %v", err)
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error closing %s: %v\n", file, err)
+		}
+	}()
+
+	return homeDir + "/" + file, nil
+}

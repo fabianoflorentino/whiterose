@@ -54,7 +54,12 @@ type AppValidator struct {
 
 // NewAppValidator constructs a new AppValidator pre-populated with common development tools.
 func NewAppValidator() *AppValidator {
-	apps, err := utils.FetchAppsInfoFromJSON(".config.json")
+	configJSON, err := utils.LoadDotConfigJSON(".config.json")
+	if err != nil {
+		fmt.Printf("Error loading config JSON: %v\n", err)
+	}
+
+	apps, err := utils.FetchAppsInfoFromJSON(configJSON)
 	if err != nil {
 		fmt.Printf("Error fetching applications: %v\n", err)
 		return &AppValidator{os: runtime.GOOS, apps: apps}
