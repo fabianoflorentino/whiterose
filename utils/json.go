@@ -18,7 +18,6 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 )
 
@@ -47,8 +46,7 @@ func FetchReposFromJSON(file string) ([]RepoInfo, error) {
 
 	var rf ConfigFile
 	if err := json.NewDecoder(f).Decode(&rf); err != nil {
-		log.Fatalf("failed to decode JSON: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to decode JSON: %v", err)
 	}
 
 	return rf.Repositories, nil
