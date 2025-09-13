@@ -59,11 +59,11 @@ type appFile struct {
 // NewAppValidator constructs a new AppValidator pre-populated with common development tools.
 func NewAppValidator() *AppValidator {
 	apps := []AppInfo{}
-	file, err := os.Open("config.json")
+	file, err := os.Open(".config.json")
 	if err == nil {
 		defer func() {
 			if cerr := file.Close(); cerr != nil { // check if closing the file returns an error
-				fmt.Fprintf(os.Stderr, "Error closing config.json: %v\n", cerr)
+				fmt.Fprintf(os.Stderr, "Error closing .config.json: %v\n", cerr)
 			}
 		}()
 		var af appFile
