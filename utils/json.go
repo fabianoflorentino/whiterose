@@ -17,6 +17,7 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 )
@@ -40,8 +41,7 @@ type ConfigFile struct {
 func FetchReposFromJSON(file string) ([]RepoInfo, error) {
 	f, err := os.Open(file)
 	if err != nil {
-		log.Fatalf("failed to open file: %v, %s", err, repoFile)
-		return nil, err
+		return nil, fmt.Errorf("failed to open file: %v, %s", err, repoFile)
 	}
 	defer f.Close().Error()
 
