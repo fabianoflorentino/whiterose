@@ -76,10 +76,10 @@ func FetchAppsInfoFromJSON(file string) ([]AppInfo, error) {
 		}
 	}()
 
-	var af ConfigFile
-	if err := json.NewDecoder(f).Decode(&af); err != nil {
+	var cfg ConfigFile
+	if err := json.NewDecoder(f).Decode(&cfg); err != nil {
 		return nil, fmt.Errorf("failed to decode JSON: %v", err)
 	}
 
-	return af.Applications, nil
+	return cfg.Applications, nil
 }
