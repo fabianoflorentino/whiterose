@@ -117,6 +117,9 @@ func (av *AppValidator) ValidateApps() {
 	}
 }
 
+// ValidateSpecificApps validates only the specified applications by name or command.
+// It accepts a slice of application names or commands to validate.
+// If an application is not found in the predefined list, it is skipped with a message.
 func (av *AppValidator) ValidateSpecificApps(appNames []string) {
 	var appsToValidate []AppInfo
 
