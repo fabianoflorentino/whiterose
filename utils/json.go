@@ -32,8 +32,17 @@ type RepoInfo struct {
 	Directory string `json:"directory"`
 }
 
+type AppInfo struct {
+	Name                string
+	Command             string
+	VersionFlag         string
+	RecommendedVersion  string
+	InstallInstructions map[string]string
+}
+
 type ConfigFile struct {
 	Repositories []RepoInfo `json:"repositories"`
+	Applications []AppInfo  `json:"applications"`
 }
 
 // FetchReposFromJSON reads a JSON file specified by 'file', decodes its contents into a ConfigFile struct,
@@ -42,7 +51,11 @@ func FetchReposFromJSON(file string) ([]RepoInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %v, %s", err, repoFile)
 	}
-	defer f.Close().Error()
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error closing %s: %v\n", file, err)
+		}
+	}()
 
 	var rf ConfigFile
 	if err := json.NewDecoder(f).Decode(&rf); err != nil {
@@ -50,4 +63,23 @@ func FetchReposFromJSON(file string) ([]RepoInfo, error) {
 	}
 
 	return rf.Repositories, nil
+}
+
+func FetchAppsInfoFromJSON(file string) ([]AppInfo, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file: %v, %s", err, repoFile)
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error closing %s: %v\n", file, err)
+		}
+	}()
+
+	var af ConfigFile
+	if err := json.NewDecoder(f).Decode(&af); err != nil {
+		return nil, fmt.Errorf("failed to decode JSON: %v", err)
+	}
+
+	return af.Applications, nil
 }
