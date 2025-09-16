@@ -5,32 +5,20 @@
 package setup
 
 import (
-	"log"
-	"os"
-
 	"github.com/fabianoflorentino/whiterose/git"
-	"github.com/fabianoflorentino/whiterose/utils"
+	"github.com/fabianoflorentino/whiterose/prereq"
 )
+
+func PreReq() {
+	p := prereq.NewAppValidator()
+	p.ValidateApps()
+}
 
 // GitCloneRepository loads repository configurations from a JSON file,
 // sets authentication credentials and SSH key information from environment variables,
 // and fetches/clones the repositories. If any error occurs during loading or fetching,
 // the function logs the error and terminates the application.
 func GitCloneRepository() {
-	cfg := utils.GetEnvOrDefault("CONFIG_FILE", os.Getenv("HOME")+"/.config.json")
-	repos, err := git.LoadRepositoriesFromFile(cfg)
-	if err != nil {
-		log.Fatalf("failed to load repositories: %v", err)
-	}
-
-	for i := range repos {
-		repos[i].Username = utils.GetEnvOrDefault("GIT_USER", "")
-		repos[i].Password = utils.GetEnvOrDefault("GIT_TOKEN", "")
-		repos[i].SSHKeyPath = utils.GetEnvOrDefault("SSH_KEY_PATH", "")
-		repos[i].SSHKeyName = utils.GetEnvOrDefault("SSH_KEY_NAME", "id_rsa")
-	}
-
-	if err := git.FetchRepositories(repos); err != nil {
-		log.Fatalf("failed to fetch repositories: %v", err)
-	}
+	g := git.NewGitRepository()
+	g.Setup()
 }

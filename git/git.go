@@ -33,8 +33,33 @@ type GitCloneOptions struct {
 	SSHKeyName string
 }
 
-// FetchRepositories clones multiple repositories based on provided options.
-func FetchRepositories(repos []GitCloneOptions) error {
+func NewGitRepository() *GitCloneOptions {
+	return &GitCloneOptions{}
+}
+
+func (g *GitCloneOptions) Setup() {
+	cfg := utils.GetEnvOrDefault("CONFIG_FILE", os.Getenv("HOME")+"/.config.json")
+	repos, err := LoadRepositoriesFromFile(cfg)
+	if err != nil {
+		fmt.Printf("failed to load repositories: %v", err)
+		os.Exit(1)
+	}
+
+	for i := range repos {
+		repos[i].Username = utils.GetEnvOrDefault("GIT_USER", "")
+		repos[i].Password = utils.GetEnvOrDefault("GIT_TOKEN", "")
+		repos[i].SSHKeyPath = utils.GetEnvOrDefault("SSH_KEY_PATH", "")
+		repos[i].SSHKeyName = utils.GetEnvOrDefault("SSH_KEY_NAME", "id_rsa")
+	}
+
+	if err := g.fetchRepositories(repos); err != nil {
+		fmt.Printf("failed to fetch repositories: %v", err)
+		os.Exit(1)
+	}
+}
+
+// fetchRepositories clones multiple repositories based on provided options.
+func (g *GitCloneOptions) fetchRepositories(repos []GitCloneOptions) error {
 	for _, opts := range repos {
 		fmt.Printf("Cloning %s into %s...\n", opts.URL, opts.Directory)
 		if err := clone(opts); err != nil {
