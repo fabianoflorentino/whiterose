@@ -61,6 +61,10 @@ func (a *Application) AddInstallInstruction(os OperatingSystem, instruction stri
 	return nil
 }
 
+func (a *Application) Validate() error {
+	return validateApplicationData(a.Name, a.Command, a.VersionFlag)
+}
+
 // Helper functions
 func validateApplicationData(name, command, versionFlag string) error {
 	if name == "" {
