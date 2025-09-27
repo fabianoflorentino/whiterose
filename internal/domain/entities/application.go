@@ -128,6 +128,7 @@ func validateApplicationData(name, command, versionFlag string) error {
 	return nil
 }
 
+// generateApplicationID creates a unique application ID based on the name and current timestamp.
 func generateApplicationID(name string) string {
 	normalizedName := strings.ToLower(strings.ReplaceAll(name, " ", "-"))
 	return fmt.Sprintf("app_%s_%d", normalizedName, time.Now().Unix()%10000)
