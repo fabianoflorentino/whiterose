@@ -19,6 +19,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -28,25 +30,25 @@ https://github.com/fabianoflorentino/whiterose/blob/main/README.md#usage
 )
 
 type RepoInfo struct {
-	URL       string `json:"url"`
-	Directory string `json:"directory"`
+	URL       string `json:"url" yaml:"url"`
+	Directory string `json:"directory" yaml:"directory"`
 }
 
 type AppInfo struct {
-	Name                string
-	Command             string
-	VersionFlag         string
-	RecommendedVersion  string
-	InstallInstructions map[string]string
+	Name                string            `json:"name" yaml:"name"`
+	Command             string            `json:"command" yaml:"command"`
+	VersionFlag         string            `json:"versionFlag" yaml:"versionFlag"`
+	RecommendedVersion  string            `json:"recommendedVersion" yaml:"recommendedVersion"`
+	InstallInstructions map[string]string `json:"installInstructions" yaml:"installInstructions"`
 }
 
 type ConfigFile struct {
-	Repositories []RepoInfo `json:"repositories"`
-	Applications []AppInfo  `json:"applications"`
+	Repositories []RepoInfo `json:"repositories" yaml:"repositories"`
+	Applications []AppInfo  `json:"applications" yaml:"applications"`
 }
 
-// FetchReposFromJSON reads a JSON file specified by 'file', decodes its contents into a ConfigFile struct,
-func FetchReposFromJSON(file string) ([]RepoInfo, error) {
+// FetchReposFromFileConfig reads a JSON file specified by 'file', decodes its contents into a ConfigFile struct,
+func FetchReposFromFileConfig(file string) ([]RepoInfo, error) {
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %v, %s", err, repoFile)
@@ -58,14 +60,23 @@ func FetchReposFromJSON(file string) ([]RepoInfo, error) {
 	}()
 
 	var rf ConfigFile
-	if err := json.NewDecoder(f).Decode(&rf); err != nil {
-		return nil, fmt.Errorf("failed to decode JSON: %v", err)
+
+	if IsFileJSON(file) {
+		if err := json.NewDecoder(f).Decode(&rf); err != nil {
+			return nil, fmt.Errorf("failed to decode JSON: %v", err)
+		}
+	}
+
+	if IsFileYAML(file) {
+		if err := yaml.NewDecoder(f).Decode(&rf); err != nil {
+			return nil, fmt.Errorf("failed to decode YAML: %v", err)
+		}
 	}
 
 	return rf.Repositories, nil
 }
 
-func FetchAppsInfoFromJSON(file string) ([]AppInfo, error) {
+func FetchAppsInfoFileConfig(file string) ([]AppInfo, error) {
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %v, %s", err, repoFile)
@@ -77,8 +88,17 @@ func FetchAppsInfoFromJSON(file string) ([]AppInfo, error) {
 	}()
 
 	var cfg ConfigFile
-	if err := json.NewDecoder(f).Decode(&cfg); err != nil {
-		return nil, fmt.Errorf("failed to decode JSON: %v", err)
+
+	if IsFileJSON(file) {
+		if err := json.NewDecoder(f).Decode(&cfg); err != nil {
+			return nil, fmt.Errorf("failed to decode JSON: %v", err)
+		}
+	}
+
+	if IsFileYAML(file) {
+		if err := yaml.NewDecoder(f).Decode(&cfg); err != nil {
+			return nil, fmt.Errorf("failed to decode YAML: %v", err)
+		}
 	}
 
 	return cfg.Applications, nil
