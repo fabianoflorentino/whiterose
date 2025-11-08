@@ -1,0 +1,13 @@
+repositories:
+  - url: git@github.com:fabianoflorentino/mr-robot.git
+    directory: mr_robot
+
+applications:
+  - name: Go
+    command: go
+    versionFlag: version
+    recommendedVersion: "1.25.0"
+    installInstructions:
+      linux: sudo apt install golang
+      darwin: brew install go
+      windows: choco install golang
