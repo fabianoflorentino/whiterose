@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -38,7 +39,36 @@ func LoadDotEnv() error {
 
 // LoadDotConfigJSON loads a .config.json file from the user's home directory.
 // It returns the file path as a string and an error if the file cannot be opened.
-func LoadDotConfigJSON(file string) (string, error) {
+func LoadDotConfig() (string, error) {
+	var jsonFile string = strings.TrimSpace(".config.json")
+	var yamlFile string = strings.TrimSpace(".config.yaml")
+	var ymlFile string = strings.TrimSpace(".config.yml")
+
+	if ymlOrYamlExistsInHomeDir() {
+		if fileExistsInHomeDir(ymlFile) {
+			return getFilePathInHomeDir(ymlFile)
+		} else if fileExistsInHomeDir(yamlFile) {
+			return getFilePathInHomeDir(yamlFile)
+		}
+	} else if fileExistsInHomeDir(jsonFile) {
+		return getFilePathInHomeDir(jsonFile)
+	}
+
+	return "", fmt.Errorf("no configuration file found in home directory")
+}
+
+func fileExistsInHomeDir(file string) bool {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return false
+	}
+
+	_, err = os.Stat(homeDir + "/" + file)
+	return !os.IsNotExist(err)
+}
+
+func getFilePathInHomeDir(file string) (string, error) {
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("failed to get home directory: %v", err)
@@ -55,4 +85,24 @@ func LoadDotConfigJSON(file string) (string, error) {
 	}()
 
 	return homeDir + "/" + file, nil
+}
+
+func ymlOrYamlExistsInHomeDir() bool {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return false
+	}
+
+	ymlPath := homeDir + "/" + ".config.yml"
+	yamlPath := homeDir + "/" + ".config.yaml"
+
+	if _, err := os.Stat(ymlPath); err == nil {
+		return true
+	}
+
+	if _, err := os.Stat(yamlPath); err == nil {
+		return true
+	}
+
+	return false
 }
