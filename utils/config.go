@@ -18,6 +18,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -47,8 +48,8 @@ type ConfigFile struct {
 	Applications []AppInfo  `json:"applications" yaml:"applications"`
 }
 
-// FetchReposFromFileConfig reads a JSON file specified by 'file', decodes its contents into a ConfigFile struct,
-func FetchReposFromFileConfig(file string) ([]RepoInfo, error) {
+// FetchRepositories reads a JSON file specified by 'file', decodes its contents into a ConfigFile struct,
+func FetchRepositories(file string) ([]RepoInfo, error) {
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %v, %s", err, repoFile)
@@ -61,22 +62,14 @@ func FetchReposFromFileConfig(file string) ([]RepoInfo, error) {
 
 	var rf ConfigFile
 
-	if IsFileJSON(file) {
-		if err := json.NewDecoder(f).Decode(&rf); err != nil {
-			return nil, fmt.Errorf("failed to decode JSON: %v", err)
-		}
-	}
-
-	if IsFileYAML(file) {
-		if err := yaml.NewDecoder(f).Decode(&rf); err != nil {
-			return nil, fmt.Errorf("failed to decode YAML: %v", err)
-		}
+	if err := configDecode(file, &rf); err != nil {
+		return nil, err
 	}
 
 	return rf.Repositories, nil
 }
 
-func FetchAppsInfoFileConfig(file string) ([]AppInfo, error) {
+func FetchAppsInfo(file string) ([]AppInfo, error) {
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %v, %s", err, repoFile)
@@ -89,17 +82,38 @@ func FetchAppsInfoFileConfig(file string) ([]AppInfo, error) {
 
 	var cfg ConfigFile
 
+	if err := configDecode(file, &cfg); err != nil {
+		return nil, err
+	}
+
+	return cfg.Applications, nil
+}
+
+// configDecode decodes the configuration file (JSON or YAML) into the provided ConfigFile struct.
+func configDecode(file string, cfg *ConfigFile) error {
+	fileHandle, err := os.Open(file)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v, %s", err, repoFile)
+	}
+	defer func() {
+		if err := fileHandle.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error closing %s: %v\n", file, err)
+		}
+	}()
+
+	var f io.Reader = fileHandle
+
 	if IsFileJSON(file) {
 		if err := json.NewDecoder(f).Decode(&cfg); err != nil {
-			return nil, fmt.Errorf("failed to decode JSON: %v", err)
+			return fmt.Errorf("failed to decode JSON: %v", err)
 		}
 	}
 
 	if IsFileYAML(file) {
 		if err := yaml.NewDecoder(f).Decode(&cfg); err != nil {
-			return nil, fmt.Errorf("failed to decode YAML: %v", err)
+			return fmt.Errorf("failed to decode YAML: %v", err)
 		}
 	}
 
-	return cfg.Applications, nil
+	return nil
 }
