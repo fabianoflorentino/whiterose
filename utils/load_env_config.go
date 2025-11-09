@@ -44,7 +44,7 @@ func LoadDotConfig() (string, error) {
 	var yamlFile string = strings.TrimSpace(".config.yaml")
 	var ymlFile string = strings.TrimSpace(".config.yml")
 
-	if ymlOrYamlExistsInHomeDir() {
+	if YmlOrYamlExistsInHomeDir() {
 		if fileExistsInHomeDir(ymlFile) {
 			return getFilePathInHomeDir(ymlFile)
 		} else if fileExistsInHomeDir(yamlFile) {
@@ -68,7 +68,6 @@ func fileExistsInHomeDir(file string) bool {
 }
 
 func getFilePathInHomeDir(file string) (string, error) {
-
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("failed to get home directory: %v", err)
@@ -85,24 +84,4 @@ func getFilePathInHomeDir(file string) (string, error) {
 	}()
 
 	return homeDir + "/" + file, nil
-}
-
-func ymlOrYamlExistsInHomeDir() bool {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return false
-	}
-
-	ymlPath := homeDir + "/" + ".config.yml"
-	yamlPath := homeDir + "/" + ".config.yaml"
-
-	if _, err := os.Stat(ymlPath); err == nil {
-		return true
-	}
-
-	if _, err := os.Stat(yamlPath); err == nil {
-		return true
-	}
-
-	return false
 }
