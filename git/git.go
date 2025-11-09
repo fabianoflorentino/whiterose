@@ -75,7 +75,7 @@ func (g *GitCloneOptions) fetchRepositories(repos []GitCloneOptions) error {
 
 // LoadRepositoriesFromFile loads repository clone options from a configuration file and returns a slice of GitCloneOptions.
 func LoadRepositoriesFromFile(file string) ([]GitCloneOptions, error) {
-	repoInfos, err := utils.FetchReposFromFileConfig(file)
+	repoInfos, err := utils.FetchRepositories(file)
 	if err != nil {
 		return nil, err
 	}

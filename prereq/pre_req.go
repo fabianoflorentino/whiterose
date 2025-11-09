@@ -59,7 +59,7 @@ func NewAppValidator() *AppValidator {
 		fmt.Printf("Error loading config: %v\n", err)
 	}
 
-	apps, err := utils.FetchAppsInfoFileConfig(config)
+	apps, err := utils.FetchAppsInfo(config)
 	if err != nil {
 		fmt.Printf("Error fetching applications: %v\n", err)
 		return &AppValidator{os: runtime.GOOS, apps: apps}
