@@ -8,11 +8,12 @@ Hexagonal architecture greatly facilitates testing by allowing complete isolatio
 
 ```mermaid
 graph TD
-  A["Unit Tests | (Domain + Application) | Many, Fast, Isolated"] --> B["Integration Tests | Some, Medium, API"]
-  B --> C["E2E Tests | Few, Slow, Full"]
-  style A fill:#e0ffe0,stroke:#333,stroke-width:2px, color:#000000
-  style B fill:#fffbe0,stroke:#333,stroke-width:2px, color:#000000
-  style C fill:#ffe0e0,stroke:#333,stroke-width:2px, color:#000000
+    A["Unit Tests | (Domain + Application) | Many, Fast, Isolated"] --> B["Integration Tests | Some, Medium, API"]
+    B --> C["E2E Tests | Few, Slow, Full"]
+    
+    style A fill:#e0ffe0,stroke:#333, color: #000000
+    style B fill:#fffbe0,stroke:#333, color: #000000
+    style C fill:#ffe0e0,stroke:#333, color: #000000
 ```
 
 ## 🏛️ Tests by Layer
