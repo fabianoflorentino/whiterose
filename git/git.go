@@ -24,6 +24,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 )
 
+// GitCloneOptions holds options for cloning a Git repository, including URL, directory, credentials, and SSH key information.
 type GitCloneOptions struct {
 	URL        string
 	Directory  string
@@ -33,12 +34,14 @@ type GitCloneOptions struct {
 	SSHKeyName string
 }
 
+// NewGitRepository creates and returns a new GitCloneOptions instance.
 func NewGitRepository() *GitCloneOptions {
 	return &GitCloneOptions{}
 }
 
+// Setup loads repository configuration, sets authentication options from environment variables, and clones repositories.
 func (g *GitCloneOptions) Setup() {
-	cfg := utils.GetEnvOrDefault("CONFIG_FILE", os.Getenv("HOME")+"/.config.json")
+	cfg := g.loadConfigFile(filepath.Base(os.Getenv("CONFIG_FILE")))
 	repos, err := LoadRepositoriesFromFile(cfg)
 	if err != nil {
 		fmt.Printf("failed to load repositories: %v", err)
@@ -58,7 +61,7 @@ func (g *GitCloneOptions) Setup() {
 	}
 }
 
-// fetchRepositories clones multiple repositories based on provided options.
+// fetchRepositories clones multiple repositories based on the provided options.
 func (g *GitCloneOptions) fetchRepositories(repos []GitCloneOptions) error {
 	for _, opts := range repos {
 		fmt.Printf("Cloning %s into %s...\n", opts.URL, opts.Directory)
@@ -70,7 +73,7 @@ func (g *GitCloneOptions) fetchRepositories(repos []GitCloneOptions) error {
 	return nil
 }
 
-// LoadRepositoriesFromFile loads repositories from repos.json and returns a slice of GitCloneOptions
+// LoadRepositoriesFromFile loads repository clone options from a configuration file and returns a slice of GitCloneOptions.
 func LoadRepositoriesFromFile(file string) ([]GitCloneOptions, error) {
 	repoInfos, err := utils.FetchReposFromFileConfig(file)
 	if err != nil {
@@ -87,7 +90,7 @@ func LoadRepositoriesFromFile(file string) ([]GitCloneOptions, error) {
 	return opts, nil
 }
 
-// clone clones a single Git repository into the specified directory.
+// clone clones a single Git repository into the specified directory, checks out the 'development' branch, or creates a user-specific branch if not present.
 func clone(opts GitCloneOptions) error {
 	if _, err := os.Stat(opts.Directory); err == nil {
 		return fmt.Errorf("directory %s already exists", opts.Directory)
@@ -117,7 +120,7 @@ func clone(opts GitCloneOptions) error {
 		return fmt.Errorf("failed to clone repository: %w", err)
 	}
 
-	// Após o clone, tente o checkout da branch development
+	// After cloning, try to checkout the development branch
 	worktree, err := repo.Worktree()
 	if err != nil {
 		return fmt.Errorf("failed to get worktree: %w", err)
@@ -131,7 +134,7 @@ func clone(opts GitCloneOptions) error {
 		return nil
 	}
 
-	// Se não existe, cria a branch local development/<nome_do_usuario>
+	// If it does not exist, create the local branch development/<user_name>
 	newBranch := fmt.Sprintf("development/%s", os.Getenv("USER"))
 	err = worktree.Checkout(&git.CheckoutOptions{
 		Branch: plumbing.ReferenceName("refs/heads/" + newBranch),
@@ -145,7 +148,7 @@ func clone(opts GitCloneOptions) error {
 	return nil
 }
 
-// createSSHAuth creates SSH authentication using a private key file, with support for default key locations and names.
+// createSSHAuth creates SSH authentication using a private key file, supporting default key locations and names.
 func createSSHAuth(keyPath string) (*ssh.PublicKeys, error) {
 	if keyPath == "" {
 		homeDir, err := os.UserHomeDir()
@@ -175,4 +178,17 @@ func createSSHAuth(keyPath string) (*ssh.PublicKeys, error) {
 	}
 
 	return publickeys, nil
+}
+
+// loadConfigFile determines the configuration file path based on file extension and existence of YAML/YML files in the user's home directory.
+func (g *GitCloneOptions) loadConfigFile(f string) string {
+	if utils.YmlOrYamlExistsInHomeDir() {
+		if strings.HasSuffix(f, ".yaml") {
+			return utils.GetEnvOrDefault("CONFIG_FILE", os.Getenv("HOME")+"/.config.yaml")
+		}
+
+		return utils.GetEnvOrDefault("CONFIG_FILE", os.Getenv("HOME")+"/.config.yml")
+	}
+
+	return utils.GetEnvOrDefault("CONFIG_FILE", os.Getenv("HOME")+"/.config.json")
 }
