@@ -29,7 +29,7 @@ Docker images using environment variables and custom build arguments.`,
 			deleteDockerImage()
 		case cmd.Flags().Changed("list"):
 			listDockerImages()
-		case len(args) == 0:
+		default:
 			if err := cmd.Help(); err != nil {
 				fmt.Println(err)
 			}
