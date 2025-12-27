@@ -87,7 +87,7 @@ func createTempYMLConfig(t *testing.T, repos []RepoInfo) string {
 	return filePath
 }
 
-func TestFetchRepositories_Success(t *testing.T) {
+func TestFetchRepositories_JSONSuccess(t *testing.T) {
 	repos := []RepoInfo{
 		{URL: "https://github.com/example/repo1", Directory: "repo1"},
 		{URL: "https://github.com/example/repo2", Directory: "repo2"},
