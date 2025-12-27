@@ -64,7 +64,6 @@ go build -o whiterose main.go
 
 ### Configure repositories
 
-
 Edit your configuration file: `.config.json` **or** `.config.yaml` (YAML is also supported).
 
 - Add your Git repository URLs and directory names.
