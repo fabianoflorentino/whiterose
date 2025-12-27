@@ -69,6 +69,8 @@ func FetchRepositories(file string) ([]RepoInfo, error) {
 	return rf.Repositories, nil
 }
 
+// FetchAppsInfo reads a JSON or YAML file specified by 'file', decodes its contents into a ConfigFile struct,
+// and returns the list of applications.
 func FetchAppsInfo(file string) ([]AppInfo, error) {
 	f, err := os.Open(file)
 	if err != nil {
