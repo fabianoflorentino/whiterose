@@ -8,9 +8,9 @@ Whiterose is a CLI tool written in Go that automates the setup of multiple Git r
 - Automatically checks out the `development` branch if available, or creates a branch `development/<user>`
 - Loads environment variables from a `.env` file in your home directory
 - Validates required applications (Go, Git, Docker, jq, yq) and shows installation instructions
-- Configurable via a JSON file (`config.json`) listing repositories and required applications
-- Extensible via flags and environment variables
-- Docker automation commands
+- Configurable via a JSON or YAML file (default: `$HOME/.config.json`) listing repositories and required applications
+- Extensible via command-line flags and environment variables
+- Docker automation commands (check, build, list, delete images)
 
 ## Requirements
 
@@ -34,7 +34,7 @@ go build -o whiterose main.go
 
 ### Configure repositories
 
-Edit `.config.json`:
+Edit `.config.json` (or `.config.yaml`):
 
 - Add your Git repository URLs and directory names.
 - Add any required applications for your projects.
@@ -65,56 +65,30 @@ Example:
 }
 ```
 
-```sh
-./whiterose
-```
-
-```sh
-Whiterose is a command-line tool for automating the cloning and setup of multiple Git repositories.
-It streamlines the process of preparing development environments, especially for teams working with several repositories.
-
-Features:
-- Clone repositories using HTTPS or SSH
-- Automatically checkout the development branch if available
-- Create and checkout a user-specific branch if development does not exist
-- Load environment variables from a .env file
-- Configure repositories via a JSON file
-
-Example usage:
-  whiterose setup
-
-Usage:
-  whiterose [command]
-
-Available Commands:
-  completion  Generate the autocompletion script for the specified shell
-  docker      Automates Docker operations, such as checking and building images.
-  help        Help about any command
-  pre-req     Validate and list required applications for the environment.
-  setup       A brief description of your command
-
-Flags:
-  -h, --help   help for whiterose
-
-Use "whiterose [command] --help" for more information about a command.
-```
-
 ### Run setup
 
 ```sh
-./whiterose setup
+./whiterose setup [flags]
 ```
 
-This will clone all repositories listed in `config.json` and check out the appropriate branches.
+This will clone all repositories listed in your config file and check out the appropriate branches.
 
-### Commands
+### Main Commands
 
-- `setup`: Clone and set up repositories
-- `pre-req`: Validate and list required applications for the environment
-- `docker`: Automate Docker operations (check/build images)
-- `completion`: Generate shell autocompletion scripts
+- `setup` &mdash; Clone and set up repositories
+  - Flags:
+    - `--all, -a` &mdash; Check prerequisites and clone repositories
+    - `--pre-req, -p` &mdash; Only check prerequisites
+    - `--repos, -r` &mdash; Only clone repositories
+- `pre-req` &mdash; Validate and list required applications
+  - Flags:
+    - `--check, -c` &mdash; Check if all required applications are installed
+    - `--list, -l` &mdash; List all available applications
+    - `--apps, -a` &mdash; Validate specific applications (comma-separated)
+- `docker` &mdash; Automate Docker operations (check/build/list/delete images)
+- `completion` &mdash; Generate shell autocompletion scripts
 
-Use `whiterose [command] --help` for more information about each command.
+Use `whiterose [command] --help` for more information about each command and its flags.
 
 ## Environment Variables
 
@@ -140,7 +114,7 @@ If not set, default values are used.
 - `setup/`: Setup logic for cloning repositories
 - `docker/`: Docker-related utilities
 - `utils/`: Helpers for environment variables and JSON parsing
-- `config.json`: List of repositories and required applications
+- `config.json` or `config.yaml`: List of repositories and required applications
 
 ```sh
 .
