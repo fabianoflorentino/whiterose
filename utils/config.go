@@ -49,6 +49,7 @@ type ConfigFile struct {
 }
 
 // FetchRepositories reads a JSON file specified by 'file', decodes its contents into a ConfigFile struct,
+// and returns the list of repositories.
 func FetchRepositories(file string) ([]RepoInfo, error) {
 	f, err := os.Open(file)
 	if err != nil {
