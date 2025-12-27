@@ -45,9 +45,9 @@ func init() {
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// setupCmd.PersistentFlags().String("foo", "", "A help for foo")
-	setupCmd.PersistentFlags().BoolP("all", "a", false, "Check and install pre-requisites")
+	setupCmd.PersistentFlags().BoolP("all", "a", false, "Check and install pre-requisites and clone repositories")
 	setupCmd.PersistentFlags().BoolP("pre-req", "p", false, "Check and install pre-requisites")
-	setupCmd.PersistentFlags().BoolP("repos", "r", false, "Clone Git repository")
+	setupCmd.PersistentFlags().BoolP("repos", "r", false, "Clone git repositories")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
