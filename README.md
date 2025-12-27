@@ -8,7 +8,7 @@ Whiterose is a CLI tool written in Go that automates the setup of multiple Git r
 - Automatically checks out the `development` branch if available, or creates a branch `development/<user>`
 - Loads environment variables from a `.env` file in your home directory
 - Validates required applications (Go, Git, Docker, jq, yq) and shows installation instructions
-- Configurable via a JSON or YAML file (default: `$HOME/.config.json`) listing repositories and required applications
+- Configurable via a JSON (`.json`) or YAML (`.yaml`/`.yml`) file (default: `$HOME/.config.json`) listing repositories and required applications
 - Extensible via command-line flags and environment variables
 - Docker automation commands (check, build, list, delete images)
 
@@ -64,12 +64,13 @@ go build -o whiterose main.go
 
 ### Configure repositories
 
-Edit `.config.json` (or `.config.yaml`):
+
+Edit your configuration file: `.config.json` **or** `.config.yaml` (YAML is also supported).
 
 - Add your Git repository URLs and directory names.
 - Add any required applications for your projects.
 
-Example:
+#### Example (JSON)
 
 ```json
 {
@@ -93,6 +94,23 @@ Example:
     }
   ]
 }
+```
+
+#### Example (YAML)
+
+```yaml
+repositories:
+  - url: git@github.com:fabianoflorentino/mr-robot.git
+    directory: mr_robot
+applications:
+  - name: Go
+    command: go
+    versionFlag: version
+    recommendedVersion: "1.25.0"
+    installInstructions:
+      linux: sudo apt install golang
+      darwin: brew install go
+      windows: choco install golang
 ```
 
 ### Run setup
