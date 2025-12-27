@@ -57,6 +57,7 @@ func LoadDotConfig() (string, error) {
 	return "", fmt.Errorf("no configuration file found in home directory")
 }
 
+// fileExistsInHomeDir checks if a file exists in the user's home directory.
 func fileExistsInHomeDir(file string) bool {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -67,6 +68,7 @@ func fileExistsInHomeDir(file string) bool {
 	return !os.IsNotExist(err)
 }
 
+// getFilePathInHomeDir returns the full path of a file in the user's home directory.
 func getFilePathInHomeDir(file string) (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
