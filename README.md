@@ -30,6 +30,36 @@ cd whiterose
 go build -o whiterose main.go
 ```
 
+### Option 1: Download a Pre-built Release
+
+Go to the [Releases page](https://github.com/fabianoflorentino/whiterose/releases) and download the latest binary for your operating system:
+
+- **Linux**: Download `whiterose-linux-amd64.tar.gz`, extract, and move the binary to a directory in your `$PATH`:
+  
+  ```sh
+  wget https://github.com/fabianoflorentino/whiterose/releases/latest/download/whiterose-linux-amd64.tar.gz
+  tar -xzf whiterose-linux-amd64.tar.gz
+  sudo mv whiterose /usr/local/bin/
+  ```
+
+- **macOS**: Download `whiterose-darwin-amd64.tar.gz`, extract, and move the binary:
+
+  ```sh
+  curl -LO https://github.com/fabianoflorentino/whiterose/releases/latest/download/whiterose-darwin-amd64.tar.gz
+  tar -xzf whiterose-darwin-amd64.tar.gz
+  sudo mv whiterose /usr/local/bin/
+  ```
+
+- **Windows**: Download `whiterose-windows-amd64.zip` and extract the `whiterose.exe` file. Add its folder to your `PATH` or run it directly.
+
+### Option 2: Build from Source
+
+```sh
+git clone git@github.com:fabianoflorentino/whiterose.git
+cd whiterose
+go build -o whiterose main.go
+```
+
 ## Usage
 
 ### Configure repositories
