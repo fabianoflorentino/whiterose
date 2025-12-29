@@ -3,8 +3,8 @@ package docker
 import "errors"
 
 var (
-	ErrInvalidDockerImageName                   error = errors.New("invalid docker image name")
-	ErrInvalidDockerImageTag                    error = errors.New("invalid docker image tag")
+	ErrInvalidImageName                         error = errors.New("invalid docker image name")
+	ErrInvalidImageTag                          error = errors.New("invalid docker image tag")
 	ErrArgumentKeyNotBeEmpty                    error = errors.New("build arg key cannot be empty")
 	ErrArgumentKeyNotBeSpecialChars             error = errors.New("build arg key cannot consist solely of special characters")
 	ErrDockerFilePathEmpty                      error = errors.New("dockerfile path cannot be empty")

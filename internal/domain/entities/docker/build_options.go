@@ -16,7 +16,7 @@ type BuildOptions struct {
 
 // NewBuildOptions creates a new BuildOptions instance with default values.
 func NewBuildOptions(imageName, tag string) (*BuildOptions, error) {
-	if err := validateDockerImageData(imageName, tag); err != nil {
+	if err := validateImageData(imageName, tag); err != nil {
 		return nil, err
 	}
 
@@ -81,7 +81,7 @@ func (bo *BuildOptions) GetFullImageName() string {
 
 // Validate checks if the BuildOptions are valid.
 func (bo *BuildOptions) Validate() error {
-	if err := validateDockerImageData(bo.ImageName, bo.Tag); err != nil {
+	if err := validateImageData(bo.ImageName, bo.Tag); err != nil {
 		return err
 	}
 
