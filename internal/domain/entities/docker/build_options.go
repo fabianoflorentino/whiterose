@@ -14,6 +14,7 @@ type BuildOptions struct {
 	Progress   string
 }
 
+// NewBuildOptions creates a new BuildOptions instance with default values.
 func NewBuildOptions(imageName, tag string) (*BuildOptions, error) {
 	if err := validateDockerImageData(imageName, tag); err != nil {
 		return nil, err
@@ -29,6 +30,7 @@ func NewBuildOptions(imageName, tag string) (*BuildOptions, error) {
 	}, nil
 }
 
+// AddBuildArg adds a build argument to the BuildOptions after validation.
 func (bo *BuildOptions) AddBuildArg(key, value string) error {
 	if key == "" {
 		return ErrArgumentKeyNotBeEmpty
@@ -42,6 +44,7 @@ func (bo *BuildOptions) AddBuildArg(key, value string) error {
 	return nil
 }
 
+// SetDockerfile sets the Dockerfile path for the BuildOptions.
 func (bo *BuildOptions) SetDockerfile(path string) error {
 	if path == "" {
 		return ErrDockerFilePathEmpty
@@ -52,6 +55,7 @@ func (bo *BuildOptions) SetDockerfile(path string) error {
 	return nil
 }
 
+// validateBuildArgKey checks if the build argument key is valid.
 func validateBuildArgKey(key string) error {
 	var specialChars = "!@#$%^&*()_-+=[]{}|;:'\",.<>?/`~"
 
@@ -70,10 +74,12 @@ func validateBuildArgKey(key string) error {
 	return nil
 }
 
+// GetFullImageName returns the full image name with tag.
 func (bo *BuildOptions) GetFullImageName() string {
 	return buildFullImageName(bo.ImageName, bo.Tag)
 }
 
+// Validate checks if the BuildOptions are valid.
 func (bo *BuildOptions) Validate() error {
 	if err := validateDockerImageData(bo.ImageName, bo.Tag); err != nil {
 		return err
