@@ -73,6 +73,7 @@ func (av *AppValidator) AddApp(app utils.AppInfo) {
 	av.apps = append(av.apps, app)
 }
 
+// ValidateApps checks all registered applications for installation and version.
 func (av *AppValidator) ValidateApps() {
 	installedCount := 0
 
