@@ -40,9 +40,11 @@ func LoadDotEnv() error {
 // LoadDotConfigJSON loads a .config.json file from the user's home directory.
 // It returns the file path as a string and an error if the file cannot be opened.
 func LoadDotConfig() (string, error) {
-	var jsonFile string = strings.TrimSpace(".config.json")
-	var yamlFile string = strings.TrimSpace(".config.yaml")
-	var ymlFile string = strings.TrimSpace(".config.yml")
+	var (
+		jsonFile = strings.TrimSpace(".config.json")
+		yamlFile = strings.TrimSpace(".config.yaml")
+		ymlFile  = strings.TrimSpace(".config.yml")
+	)
 
 	if YmlOrYamlExistsInHomeDir() {
 		if fileExistsInHomeDir(ymlFile) {
