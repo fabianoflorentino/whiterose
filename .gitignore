@@ -5,3 +5,4 @@
 # Added by goreleaser init:
 dist/
 !.config.json.example
+tmp/build-errors.log
