@@ -8,7 +8,6 @@ import (
 
 // Image represents a Docker image in domain.
 type Image struct {
-	ID         string
 	Name       string
 	Tag        string
 	FullName   string
@@ -29,7 +28,6 @@ func NewImage(name, tag string) (*Image, error) {
 	fullName := buildFullImageName(name, tag)
 
 	return &Image{
-		ID:        generateImageIR(fullName),
 		Name:      name,
 		Tag:       tag,
 		FullName:  fullName,
@@ -122,9 +120,4 @@ func validateImageData(name, tag string) error {
 // buildFullImageName constructs the full image name from name and tag.
 func buildFullImageName(name, tag string) string {
 	return fmt.Sprintf("%s:%s", name, tag)
-}
-
-// generateImageIR generates a unique identifier for the Docker image.
-func generateImageIR(fullName string) string {
-	return fmt.Sprintf("img_%d", len(fullName)*int(time.Now().Unix())%10000)
 }
