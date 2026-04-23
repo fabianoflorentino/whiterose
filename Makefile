@@ -67,7 +67,9 @@ lint:
 # Format code
 fmt:
 	$(GO) fmt ./...
+ifneq (,$(shell which gofumpt))
 	gofumpt -w .
+endif
 
 # Run go vet
 vet:
