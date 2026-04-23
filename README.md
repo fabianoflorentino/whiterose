@@ -14,10 +14,10 @@ Whiterose is a CLI tool written in Go that automates the setup of multiple Git r
 
 ## Requirements
 
-- Go 1.25+
+- Go 1.26+
 - SSH keys (for cloning via SSH)
 - `.env` file in your home directory (required, for environment configuration)
-- `.config.json` file in your home directory (required, for repository configuration and applications validation)
+- `.config.json` file in your home directory (required, for repository configuration and applications)
 - Linux, macOS, or Windows
 
 ## Installation
@@ -84,7 +84,7 @@ Edit your configuration file: `.config.json` **or** `.config.yaml` (YAML is also
       "name": "Go",
       "command": "go",
       "versionFlag": "version",
-      "recommendedVersion": "1.25.0",
+      "recommendedVersion": "1.26.0",
       "installInstructions": {
         "linux":   "sudo apt install golang",
         "darwin":  "brew install go",
@@ -105,7 +105,7 @@ applications:
   - name: Go
     command: go
     versionFlag: version
-    recommendedVersion: "1.25.0"
+    recommendedVersion: "1.26.0"
     installInstructions:
       linux: sudo apt install golang
       darwin: brew install go
@@ -133,6 +133,22 @@ This will clone all repositories listed in your config file and check out the ap
     - `--list, -l` &mdash; List all available applications
     - `--apps, -a` &mdash; Validate specific applications (comma-separated)
 - `docker` &mdash; Automate Docker operations (check/build/list/delete images)
+  - Flags:
+    - `--file, -f` &mdash; Check if Dockerfile exists
+    - `--build, -b` &mdash; Build Docker image
+    - `--list, -l` &mdash; List Docker images
+    - `--delete, -d` &mdash; Delete Docker image
+- `update` &mdash; Update dependencies and versions (Go, Docker)
+  - Flags:
+    - `--go-mod, -g` &mdash; Update go.mod dependencies
+    - `--go-version, -v` &mdash; Update Go version in go.mod
+    - `--docker-image, -d` &mdash; Update base Docker image
+    - `--list, -l` &mdash; List available updates
+    - `--major, -m` &mdash; Update major version
+    - `--dry-run, -n` &mdash; Show what would be updated
+    - `--pr, -p` &mdash; Create pull request after update
+    - `--base, -b` &mdash; Base branch for PR (default: main)
+    - `--config, -c` &mdash; Path to update config file
 - `completion` &mdash; Generate shell autocompletion scripts
 
 Use `whiterose [command] --help` for more information about each command and its flags.
@@ -155,24 +171,37 @@ If not set, default values are used.
 ## Project Structure
 
 - `main.go`: Entry point, loads environment and executes commands
-- `cmd/`: CLI commands (`setup`, `pre-req`, `docker`)
+- `cmd/`: CLI commands (`setup`, `pre-req`, `docker`, `update`)
 - `git/`: Git operations (clone, checkout)
 - `prereq/`: Environment validation utilities
 - `setup/`: Setup logic for cloning repositories
 - `docker/`: Docker-related utilities
+- `update/`: Version update utilities
 - `utils/`: Helpers for environment variables and JSON parsing
 - `config.json` or `config.yaml`: List of repositories and required applications
+- `internal/`: Clean Architecture layers
+  - `interfaces/`: SOLID interfaces
+  - `services/`: Service implementations
+  - `domain/`: Domain entities
+  - `application/`: Application services
 
 ```sh
 .
 ├── cmd/
 ├── docker/
 ├── git/
+├── internal/
+│   ├── application/
+│   ├── domain/
+│   ├── interfaces/
+│   └── services/
 ├── prereq/
 ├── setup/
+├── update/
 ├── utils/
 ├── config.json
 ├── Dockerfile
+├── Makefile
 ├── main.go
 ├── README.md
 └── ...
