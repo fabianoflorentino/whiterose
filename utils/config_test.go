@@ -200,12 +200,12 @@ func TestFetchRepositories_InvalidYML(t *testing.T) {
 func TestFetchAppsInfo(t *testing.T) {
 	tmpDir := t.TempDir()
 	configPath := filepath.Join(tmpDir, "config.json")
-	
+
 	config := `{"applications":[{"name":"Go","command":"go","versionFlag":"version","recommendedVersion":"1.20"}]}`
 	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
 		t.Fatalf("failed to create config: %v", err)
 	}
-	
+
 	apps, err := FetchAppsInfo(configPath)
 	if err != nil {
 		t.Errorf("FetchAppsInfo() error = %v", err)
@@ -221,7 +221,7 @@ func TestFetchAppsInfo(t *testing.T) {
 func TestFetchAppsInfo_WithYAML(t *testing.T) {
 	tmpDir := t.TempDir()
 	configPath := filepath.Join(tmpDir, "config.yaml")
-	
+
 	config := `applications:
   - name: Go
     command: go
@@ -229,7 +229,7 @@ func TestFetchAppsInfo_WithYAML(t *testing.T) {
 	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
 		t.Fatalf("failed to create config: %v", err)
 	}
-	
+
 	apps, err := FetchAppsInfo(configPath)
 	if err != nil {
 		t.Errorf("FetchAppsInfo() error = %v", err)

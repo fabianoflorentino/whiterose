@@ -27,12 +27,12 @@ type GitCloner interface {
 
 type CloneOptions struct {
 	URL        string
-	Directory string
-	Username  string
-	Password  string
+	Directory  string
+	Username   string
+	Password   string
 	SSHKeyPath string
 	SSHKeyName string
-	Branch    string
+	Branch     string
 }
 
 type AppChecker interface {
@@ -49,7 +49,7 @@ type AppValidation struct {
 	RecommendedVersion string
 	IsUpToDate         bool
 	InstallInstruction string
-	OS                string
+	OS                 string
 }
 
 type ImageBuilder interface {
@@ -62,10 +62,10 @@ type ImageBuilder interface {
 type ImageBuildOptions struct {
 	Dockerfile string
 	ImageName  string
-	Context   string
-	BuildArgs map[string]string
-	Target   string
-	NoCache  bool
+	Context    string
+	BuildArgs  map[string]string
+	Target     string
+	NoCache    bool
 }
 
 type Executor interface {

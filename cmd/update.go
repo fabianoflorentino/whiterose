@@ -15,15 +15,15 @@ import (
 )
 
 var (
-	updateGoMod        bool
+	updateGoMod       bool
 	updateGoVersion   bool
 	updateDockerImage bool
-	updateMajor      bool
-	updateConfigPath string
-	updateList      bool
-	updatePR        bool
-	updateDryRun    bool
-	updateBase      string
+	updateMajor       bool
+	updateConfigPath  string
+	updateList        bool
+	updatePR          bool
+	updateDryRun      bool
+	updateBase        string
 )
 
 var updateCmd = &cobra.Command{
@@ -126,7 +126,7 @@ The command will:
 					continue
 				}
 
-if updatePR {
+				if updatePR {
 					if err := service.CreatePRWithBase(project, branchName, changes, updateBase); err != nil {
 						fmt.Fprintf(os.Stderr, "Error creating PR: %v\n", err)
 						continue

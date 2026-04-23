@@ -6,8 +6,8 @@ import (
 
 func TestNewRepository(t *testing.T) {
 	tests := []struct {
-		name     string
-		url      string
+		name    string
+		url     string
 		dir     string
 		wantErr bool
 	}{
@@ -37,21 +37,21 @@ func TestNewRepository(t *testing.T) {
 
 func TestRepository_SetBranch(t *testing.T) {
 	tests := []struct {
-		name     string
+		name    string
 		repo    *Repository
-		branch   string
+		branch  string
 		wantErr bool
 	}{
 		{"valid branch", &Repository{
-			URL:       "https://github.com/fabiano/repo.git",
-			Directory: "repo",
-			Branch:    "main",
+			URL:        "https://github.com/fabiano/repo.git",
+			Directory:  "repo",
+			Branch:     "main",
 			AuthMethod: AuthenticationMethod{Type: AuthTypeSSH, SSHKey: SSHKeyConfig{Name: "id_rsa"}},
 		}, "develop", false},
 		{"empty branch", &Repository{
-			URL:       "https://github.com/fabiano/repo.git",
-			Directory: "repo",
-			Branch:    "main",
+			URL:        "https://github.com/fabiano/repo.git",
+			Directory:  "repo",
+			Branch:     "main",
 			AuthMethod: AuthenticationMethod{Type: AuthTypeSSH, SSHKey: SSHKeyConfig{Name: "id_rsa"}},
 		}, "", true},
 	}
@@ -143,7 +143,7 @@ func TestRepository_Validate(t *testing.T) {
 func TestAuthenticationMethod_Validate(t *testing.T) {
 	tests := []struct {
 		name    string
-		auth   AuthenticationMethod
+		auth    AuthenticationMethod
 		wantErr bool
 	}{
 		{

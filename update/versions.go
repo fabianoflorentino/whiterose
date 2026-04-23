@@ -33,7 +33,7 @@ func (vc *VersionChecker) ListGoVersions() error {
 
 	var versions []struct {
 		Version string `json:"version"`
-		Stable bool   `json:"stable"`
+		Stable  bool   `json:"stable"`
 	}
 
 	if err := json.Unmarshal(body, &versions); err != nil {

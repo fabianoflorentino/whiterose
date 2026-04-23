@@ -6,10 +6,10 @@ import (
 
 func TestNewApplication(t *testing.T) {
 	tests := []struct {
-		name      string
-		command   string
-		version   string
-		wantErr   bool
+		name    string
+		command string
+		version string
+		wantErr bool
 	}{
 		{"Go", "go", "version", false},
 		{"Docker", "docker", "--version", false},
@@ -45,9 +45,9 @@ func TestApplication_AddInstallInstruction(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		os         OperatingSystem
+		os          OperatingSystem
 		instruction string
-		wantErr    bool
+		wantErr     bool
 	}{
 		{"linux", OSLinux, "sudo apt install golang", false},
 		{"darwin", OSDarwin, "brew install go", false},
@@ -68,7 +68,7 @@ func TestApplication_AddInstallInstruction(t *testing.T) {
 func TestApplication_Validate(t *testing.T) {
 	tests := []struct {
 		name    string
-		app    *Application
+		app     *Application
 		wantErr bool
 	}{
 		{"valid", &Application{Name: "Go", Command: "go", VersionFlag: "version"}, false},

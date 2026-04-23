@@ -21,21 +21,21 @@ type GoModConfig struct {
 }
 
 type DockerImageConfig struct {
-	Base        string         `json:"base" yaml:"base"`
+	Base           string         `json:"base" yaml:"base"`
 	UpdateStrategy UpdateStrategy `json:"updateStrategy" yaml:"updateStrategy"`
 }
 
 type GoVersionConfig struct {
-	Version     string        `json:"version" yaml:"version"`
+	Version        string         `json:"version" yaml:"version"`
 	UpdateStrategy UpdateStrategy `json:"updateStrategy" yaml:"updateStrategy"`
 }
 
 type UpdateProject struct {
-	Name            string           `json:"name" yaml:"name"`
-	Path            string           `json:"path" yaml:"path"`
-	GoMod           *GoModConfig     `json:"goMod" yaml:"goMod"`
-	GoVersion       *GoVersionConfig `json:"goVersion" yaml:"goVersion"`
-	DockerImage     *DockerImageConfig `json:"dockerImage" yaml:"dockerImage"`
+	Name        string             `json:"name" yaml:"name"`
+	Path        string             `json:"path" yaml:"path"`
+	GoMod       *GoModConfig       `json:"goMod" yaml:"goMod"`
+	GoVersion   *GoVersionConfig   `json:"goVersion" yaml:"goVersion"`
+	DockerImage *DockerImageConfig `json:"dockerImage" yaml:"dockerImage"`
 }
 
 type UpdateConfig struct {

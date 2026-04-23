@@ -7,11 +7,11 @@ import (
 
 func TestGetEnvOrDefault(t *testing.T) {
 	tests := []struct {
-		name         string
-		key         string
-		value       string
-		defaultVal  string
-		want        string
+		name       string
+		key        string
+		value      string
+		defaultVal string
+		want       string
 	}{
 		{"env set", "TEST_KEY", "test_value", "default", "test_value"},
 		{"env empty", "TEST_KEY", "", "default", "default"},

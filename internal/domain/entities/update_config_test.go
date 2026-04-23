@@ -7,10 +7,10 @@ import (
 
 func TestParseUpdateConfig(t *testing.T) {
 	tests := []struct {
-		name     string
-		config   string
-		wantLen  int
-		wantErr  bool
+		name    string
+		config  string
+		wantLen int
+		wantErr bool
 	}{
 		{
 			"valid yaml",
@@ -68,8 +68,8 @@ func TestGetTimestampedBranchName(t *testing.T) {
 
 func TestUpdateStrategy_String(t *testing.T) {
 	tests := []struct {
-		strat  UpdateStrategy
-		want   string
+		strat UpdateStrategy
+		want  string
 	}{
 		{StrategyPatch, "patch"},
 		{StrategyMinor, "minor"},
@@ -85,8 +85,8 @@ func TestUpdateStrategy_String(t *testing.T) {
 
 func TestParseUpdateStrategy(t *testing.T) {
 	tests := []struct {
-		input  string
-		want   UpdateStrategy
+		input string
+		want  UpdateStrategy
 	}{
 		{"major", StrategyMajor},
 		{"Major", StrategyMajor},

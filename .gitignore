@@ -6,3 +6,5 @@
 dist/
 !.config.json.example
 tmp/build-errors.log
+coverage.out
+whiterose

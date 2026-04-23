@@ -99,10 +99,10 @@ func TestAppValidatorService_ValidateOne_Installed(t *testing.T) {
 	svc := NewAppValidatorService()
 	svc.WithExecutor(&mockExecutor{found: true, version: "1.0.0"})
 	result := svc.ValidateOne(interfaces.AppInfo{
-		Name:                 "fake-app",
-		Command:             "fake-cmd",
-		VersionFlag:          "--version",
-		RecommendedVersion:  "1.0.0",
+		Name:               "fake-app",
+		Command:            "fake-cmd",
+		VersionFlag:        "--version",
+		RecommendedVersion: "1.0.0",
 	})
 	if !result.IsInstalled {
 		t.Error("expected installed = true")
@@ -183,7 +183,7 @@ func TestAppValidatorService_Validate(t *testing.T) {
 type mockExecutor struct {
 	found   bool
 	version string
-	err    error
+	err     error
 }
 
 func (m *mockExecutor) Run(cmd string, args ...string) (string, error) {
