@@ -1,4 +1,4 @@
-FROM golang:alpine3.22 AS base
+FROM golang:1.26-alpine3.23 AS base
 
 WORKDIR /whiterose
 
