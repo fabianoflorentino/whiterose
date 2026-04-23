@@ -44,9 +44,7 @@ func (c *ConfigService) LoadRepositories() ([]interfaces.RepoInfo, error) {
 func (c *ConfigService) LoadApps() ([]interfaces.AppInfo, error) {
 	if c.configPath == "" {
 		cfg, err := utils.LoadDotConfig()
-		if err != nil {
-			cfg = ""
-		} else {
+		if err == nil {
 			c.configPath = cfg
 		}
 	}

@@ -92,7 +92,7 @@ func (s *UpdateService) CreateBranchAndCommit(project entities.UpdateProject, ch
 	projectPath := project.Path
 
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	if err := os.Chdir(projectPath); err != nil {
 		return "", fmt.Errorf("failed to change to project directory: %w", err)
@@ -180,7 +180,9 @@ func (s *UpdateService) calculateNewVersion(current string, strategy entities.Up
 	majorNum := 0
 	minorNum := 0
 	patchNum := 0
-	fmt.Sscanf(current, "%d.%d.%d", &majorNum, &minorNum, &patchNum)
+	if _, err := fmt.Sscanf(current, "%d.%d.%d", &majorNum, &minorNum, &patchNum); err != nil {
+		return "1.25.0"
+	}
 
 	if major {
 		majorNum++
@@ -237,7 +239,9 @@ func (s *UpdateService) calculateNewDockerImage(current string, strategy entitie
 
 	majorNum := 0
 	minorNum := 0
-	fmt.Sscanf(baseVersion, "%d.%d", &majorNum, &minorNum)
+	if _, err := fmt.Sscanf(baseVersion, "%d.%d", &majorNum, &minorNum); err != nil {
+		return current
+	}
 
 	if major {
 		majorNum++

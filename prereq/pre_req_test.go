@@ -7,12 +7,8 @@ import (
 	"github.com/fabianoflorentino/whiterose/utils"
 )
 
-func TestNewAppValidator(t *testing.T) {
-	av := &AppValidator{
-		apps: []utils.AppInfo{},
-		os:   runtime.GOOS,
-	}
-
+func TestAppValidator_New(t *testing.T) {
+	av := NewAppValidator()
 	if av == nil {
 		t.Error("NewAppValidator() returned nil")
 	}
@@ -25,9 +21,9 @@ func TestAppValidator_AddApp(t *testing.T) {
 	}
 
 	av.AddApp(utils.AppInfo{
-		Name:         "Go",
-		Command:      "go",
-		VersionFlag:  "version",
+		Name:        "Go",
+		Command:     "go",
+		VersionFlag: "version",
 	})
 
 	if len(av.apps) != 1 {
@@ -103,7 +99,7 @@ func TestAppValidator_ListAvailableApps_WithApps(t *testing.T) {
 func TestCheckAppInstalled_NotFound(t *testing.T) {
 	av := &AppValidator{
 		apps: []utils.AppInfo{},
-		os: runtime.GOOS,
+		os:   runtime.GOOS,
 	}
 
 	_, _, err := av.checkAppInstalled(utils.AppInfo{Command: "nonexistent-cmd"})
@@ -119,7 +115,7 @@ func TestCheckAppInstalled_Found(t *testing.T) {
 
 	av := &AppValidator{
 		apps: []utils.AppInfo{},
-		os: runtime.GOOS,
+		os:   runtime.GOOS,
 	}
 
 	_, _, err := av.checkAppInstalled(utils.AppInfo{Command: "go", VersionFlag: "version"})

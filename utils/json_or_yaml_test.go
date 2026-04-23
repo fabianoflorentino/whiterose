@@ -8,9 +8,9 @@ import (
 
 func TestIsFileJSON(t *testing.T) {
 	tests := []struct {
-		name     string
-		file    string
-		want    bool
+		name string
+		file string
+		want bool
 	}{
 		{"json file", "config.json", true},
 		{"yaml file", "config.yaml", false},
@@ -32,9 +32,9 @@ func TestIsFileJSON(t *testing.T) {
 
 func TestIsFileYAML(t *testing.T) {
 	tests := []struct {
-		name     string
-		file    string
-		want    bool
+		name string
+		file string
+		want bool
 	}{
 		{"yaml file", "config.yaml", true},
 		{"yml file", "config.yml", true},
@@ -61,28 +61,28 @@ func TestYmlOrYamlExistsInHomeDir(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		setup  func() error
+		name     string
+		setup    func() error
 		teardown func() error
-		want   bool
+		want     bool
 	}{
 		{
-			name:    "yaml exists",
-			setup:  func() error { return os.WriteFile(filepath.Join(homeDir, ".config.yaml"), []byte(""), 0644) },
+			name:     "yaml exists",
+			setup:    func() error { return os.WriteFile(filepath.Join(homeDir, ".config.yaml"), []byte(""), 0644) },
 			teardown: func() error { return os.Remove(filepath.Join(homeDir, ".config.yaml")) },
-			want:    true,
+			want:     true,
 		},
 		{
-			name:    "yml exists",
-			setup:  func() error { return os.WriteFile(filepath.Join(homeDir, ".config.yml"), []byte(""), 0644) },
+			name:     "yml exists",
+			setup:    func() error { return os.WriteFile(filepath.Join(homeDir, ".config.yml"), []byte(""), 0644) },
 			teardown: func() error { return os.Remove(filepath.Join(homeDir, ".config.yml")) },
-			want:    true,
+			want:     true,
 		},
 		{
-			name:    "no file",
-			setup:  func() error { return nil },
+			name:     "no file",
+			setup:    func() error { return nil },
 			teardown: func() error { return nil },
-			want:    false,
+			want:     false,
 		},
 	}
 
@@ -91,7 +91,7 @@ func TestYmlOrYamlExistsInHomeDir(t *testing.T) {
 			if err := tt.setup(); err != nil {
 				t.Fatalf("setup failed: %v", err)
 			}
-			defer tt.teardown()
+			defer func() { _ = tt.teardown() }()
 
 			if got := YmlOrYamlExistsInHomeDir(); got != tt.want {
 				t.Errorf("YmlOrYamlExistsInHomeDir() = %v, want %v", got, tt.want)

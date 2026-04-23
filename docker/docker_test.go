@@ -32,7 +32,7 @@ func TestDockerManager_DetectDockerFile_NotFound(t *testing.T) {
 
 func TestDockerManager_DetectDockerFile_Found(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	dockerfilePath := filepath.Join(tmpDir, "Dockerfile")
 	if err := os.WriteFile(dockerfilePath, []byte("FROM golang:1.20"), 0644); err != nil {
 		t.Fatalf("failed to create dockerfile: %v", err)
@@ -51,7 +51,7 @@ func TestDockerManager_DetectDockerFile_Found(t *testing.T) {
 
 func TestDockerManager_DetectDockerFile_Named(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	dockerfilePath := filepath.Join(tmpDir, "Dockerfile.app")
 	if err := os.WriteFile(dockerfilePath, []byte("FROM node:20"), 0644); err != nil {
 		t.Fatalf("failed to create dockerfile: %v", err)
@@ -71,8 +71,10 @@ func TestDockerManager_DetectDockerFile_Named(t *testing.T) {
 func TestDockerManager_DetectDockerFile_SubDir(t *testing.T) {
 	tmpDir := t.TempDir()
 	subDir := filepath.Join(tmpDir, "subdir")
-	os.MkdirAll(subDir, 0755)
-	
+	if err := os.MkdirAll(subDir, 0755); err != nil {
+		t.Fatalf("failed to create subdir: %v", err)
+	}
+
 	dockerfilePath := filepath.Join(subDir, "Dockerfile")
 	if err := os.WriteFile(dockerfilePath, []byte("FROM python:3.11"), 0644); err != nil {
 		t.Fatalf("failed to create dockerfile: %v", err)
@@ -99,5 +101,8 @@ func TestDockerManager_DeleteDockerImage(t *testing.T) {
 
 func TestDockerManager_ListDockerImages(t *testing.T) {
 	dm := NewDockerManager("/tmp")
-	dm.ListDockerImages("nonexistent-image")
+	err := dm.ListDockerImages("nonexistent-image")
+	if err != nil {
+		t.Logf("ListDockerImages error: %v", err)
+	}
 }

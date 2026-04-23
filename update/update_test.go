@@ -53,9 +53,9 @@ func TestExtractDockerImage(t *testing.T) {
 	s := &UpdateService{}
 
 	tests := []struct {
-		name    string
-		input  string
-		want   string
+		name  string
+		input string
+		want  string
 	}{
 		{"simple", "FROM golang:1.20", "golang:1.20"},
 		{"alpine", "FROM golang:1.20-alpine", "golang:1.20-alpine"},
@@ -211,7 +211,9 @@ func TestLoadUpdateConfig(t *testing.T) {
 func TestGetCurrentGoVersion(t *testing.T) {
 	tmpDir := t.TempDir()
 	goModPath := filepath.Join(tmpDir, "go.mod")
-	os.WriteFile(goModPath, []byte("module test\ngo 1.24.0"), 0644)
+	if err := os.WriteFile(goModPath, []byte("module test\ngo 1.24.0"), 0644); err != nil {
+		t.Fatalf("failed to create go.mod: %v", err)
+	}
 
 	if got := New().getCurrentGoVersion(goModPath); got != "1.24.0" {
 		t.Errorf("getCurrentGoVersion() = %v, want 1.24.0", got)
@@ -227,7 +229,9 @@ func TestGetCurrentGoVersion_NotFound(t *testing.T) {
 func TestUpdateGoModFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	goModPath := filepath.Join(tmpDir, "go.mod")
-	os.WriteFile(goModPath, []byte("module test\ngo 1.24.0"), 0644)
+	if err := os.WriteFile(goModPath, []byte("module test\ngo 1.24.0"), 0644); err != nil {
+		t.Fatalf("failed to create go.mod: %v", err)
+	}
 
 	if err := New().updateGoModFile(goModPath, "1.25.0"); err != nil {
 		t.Errorf("updateGoModFile() error = %v", err)

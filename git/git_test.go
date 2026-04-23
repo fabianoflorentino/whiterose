@@ -16,12 +16,12 @@ func TestNewGitRepository(t *testing.T) {
 func TestLoadRepositoriesFromFile_JSON(t *testing.T) {
 	tmpDir := t.TempDir()
 	configPath := filepath.Join(tmpDir, "config.json")
-	
+
 	config := `{"repositories":[{"url":"https://github.com/test/repo","directory":"test"}]}`
 	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
 		t.Fatalf("failed to create config: %v", err)
 	}
-	
+
 	repos, err := LoadRepositoriesFromFile(configPath)
 	if err != nil {
 		t.Errorf("LoadRepositoriesFromFile() error = %v", err)
@@ -34,14 +34,14 @@ func TestLoadRepositoriesFromFile_JSON(t *testing.T) {
 func TestLoadRepositoriesFromFile_YAML(t *testing.T) {
 	tmpDir := t.TempDir()
 	configPath := filepath.Join(tmpDir, "config.yaml")
-	
+
 	config := `repositories:
   - url: https://github.com/test/repo
     directory: test`
 	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
 		t.Fatalf("failed to create config: %v", err)
 	}
-	
+
 	repos, err := LoadRepositoriesFromFile(configPath)
 	if err != nil {
 		t.Errorf("LoadRepositoriesFromFile() error = %v", err)
@@ -61,8 +61,10 @@ func TestLoadRepositoriesFromFile_NotFound(t *testing.T) {
 func TestLoadRepositoriesFromFile_Invalid(t *testing.T) {
 	tmpDir := t.TempDir()
 	configPath := filepath.Join(tmpDir, "invalid.json")
-	os.WriteFile(configPath, []byte("{invalid"), 0644)
-	
+	if err := os.WriteFile(configPath, []byte("{invalid"), 0644); err != nil {
+		t.Fatalf("failed to create invalid config: %v", err)
+	}
+
 	_, err := LoadRepositoriesFromFile(configPath)
 	if err == nil {
 		t.Error("expected error for invalid file")
