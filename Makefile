@@ -1,23 +1,43 @@
-.PHONY: build test test-cover lint fmt vet clean install run help deps
+.PHONY: build test test-cover lint fmt vet clean install run help deps \
+	docker-build docker-run docker-dev docker-prod docker-clean docker-push docker-tag
 
 # Build variables
 BINARY_NAME=whiterose
 GO=go
 OUTPUT_DIR=bin
+DOCKER_REGISTRY=docker.io
+DOCKER_IMAGE=$(DOCKER_REGISTRY)/$(BINARY_NAME)
+DOCKER_TAG=$(shell git describe --tags --always --dirty 2>/dev/null || echo "latest")
 
 # Default target
 help:
 	@echo "Available targets:"
+	@echo ""
+	@echo "Build:"
 	@echo "  build        - Build the binary"
 	@echo "  build-all   - Build for multiple platforms"
+	@echo ""
+	@echo "Test:"
 	@echo "  test        - Run tests"
 	@echo "  test-cover  - Run tests with coverage"
-	@echo "  lint       - Run linters"
+	@echo ""
+	@echo "Code Quality:"
+	@echo "  lint        - Run linters"
 	@echo "  fmt        - Format code"
 	@echo "  vet        - Run go vet"
+	@echo ""
+	@echo "Docker:"
+	@echo "  docker-build  - Build Docker image"
+	@echo "  docker-run    - Run container"
+	@echo "  docker-dev    - Run in development mode"
+	@echo "  docker-prod   - Run in production mode"
+	@echo "  docker-push   - Push image to registry"
+	@echo "  docker-clean - Remove local images"
+	@echo ""
+	@echo "Utility:"
 	@echo "  clean      - Clean build artifacts"
-	@echo "  install    - Install binary to GOBIN"
-	@echo "  run        - Build and run CLI"
+	@echo "  install   - Install binary to GOBIN"
+	@echo "  run       - Build and run CLI"
 
 # Build the binary
 build:
@@ -69,3 +89,38 @@ run: build
 # Run specific command
 run-cmd: build
 	./$(OUTPUT_DIR)/$(BINARY_NAME) $(CMD)
+
+# ============================================
+# Docker targets
+# ============================================
+
+# Build Docker image
+docker-build:
+	docker build -t $(DOCKER_IMAGE):$(DOCKER_TAG) -t $(DOCKER_IMAGE):latest .
+
+# Run container (production)
+docker-run:
+	docker run --rm -it $(DOCKER_IMAGE):latest
+
+# Run in development mode
+docker-dev:
+	docker build --target development -t $(BINARY_NAME)-dev .
+	docker run --rm -it -v "$$(pwd):/whiterose" -w /whiterose $(BINARY_NAME)-dev
+
+# Run production container
+docker-prod:
+	docker build --target production -t $(DOCKER_IMAGE)-prod .
+	docker run --rm -it $(DOCKER_IMAGE)-prod
+
+# Push image to registry
+docker-push: docker-build
+	docker push $(DOCKER_IMAGE):$(DOCKER_TAG)
+	docker push $(DOCKER_IMAGE):latest
+
+# Tag image
+docker-tag:
+	docker tag $(DOCKER_IMAGE):latest $(DOCKER_IMAGE):$(DOCKER_TAG)
+
+# Clean Docker images
+docker-clean:
+	docker rmi $(DOCKER_IMAGE):$(DOCKER_TAG) $(DOCKER_IMAGE):latest $(DOCKER_IMAGE)-prod 2>/dev/null || true
