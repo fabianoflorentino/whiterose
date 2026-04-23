@@ -196,3 +196,45 @@ func TestFetchRepositories_InvalidYML(t *testing.T) {
 		t.Fatal("expected error for invalid YML, got nil")
 	}
 }
+
+func TestFetchAppsInfo(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "config.json")
+	
+	config := `{"applications":[{"name":"Go","command":"go","versionFlag":"version","recommendedVersion":"1.20"}]}`
+	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
+		t.Fatalf("failed to create config: %v", err)
+	}
+	
+	apps, err := FetchAppsInfo(configPath)
+	if err != nil {
+		t.Errorf("FetchAppsInfo() error = %v", err)
+	}
+	if len(apps) != 1 {
+		t.Errorf("len(apps) = %d, want 1", len(apps))
+	}
+	if apps[0].Name != "Go" {
+		t.Errorf("Name = %v, want Go", apps[0].Name)
+	}
+}
+
+func TestFetchAppsInfo_WithYAML(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "config.yaml")
+	
+	config := `applications:
+  - name: Go
+    command: go
+    versionFlag: version`
+	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
+		t.Fatalf("failed to create config: %v", err)
+	}
+	
+	apps, err := FetchAppsInfo(configPath)
+	if err != nil {
+		t.Errorf("FetchAppsInfo() error = %v", err)
+	}
+	if len(apps) != 1 {
+		t.Errorf("len(apps) = %d, want 1", len(apps))
+	}
+}
