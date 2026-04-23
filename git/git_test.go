@@ -78,3 +78,19 @@ func TestGitCloneOptions_Setup(t *testing.T) {
 func TestGitCloneOptions_fetchRepositories(t *testing.T) {
 	t.Skip("fetchRepositories clones real repos")
 }
+
+func TestLoadConfigFile(t *testing.T) {
+	g := NewGitRepository()
+	path := g.loadConfigFile("")
+	if path == "" {
+		t.Error("expected non-empty path")
+	}
+}
+
+func TestLoadConfigFile_WithYaml(t *testing.T) {
+	g := NewGitRepository()
+	path := g.loadConfigFile("/some/path.yaml")
+	if path == "" {
+		t.Error("expected non-empty path")
+	}
+}
