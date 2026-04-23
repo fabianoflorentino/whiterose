@@ -1,0 +1,19 @@
+projects:
+  - name: mr-robot
+    path: ./mr-robot
+    goMod:
+      updateStrategy: minor
+    goVersion:
+      version: "1.26.0"
+      updateStrategy: minor
+    dockerImage:
+      base: golang:1.26-alpine
+      updateStrategy: minor
+
+  - name: another-project
+    path: ~/projects/another-project
+    goMod:
+      updateStrategy: patch
+    dockerImage:
+      base: node:20-alpine
+      updateStrategy: minor
