@@ -27,6 +27,8 @@ on:
 env:
   GO_VERSION: '1.26'
   APP_NAME: whiterose
+  SKIP_DOTENV: 'true'
+  CI: 'true'
 
 permissions:
   contents: write

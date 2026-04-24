@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/fabianoflorentino/whiterose/cmd"
 	"github.com/fabianoflorentino/whiterose/utils"
@@ -14,7 +15,15 @@ func main() {
 }
 
 func init() {
+	if os.Getenv("SKIP_DOTENV") == "true" {
+		return
+	}
+
 	if err := utils.LoadDotEnv(); err != nil {
-		log.Println("Failed to load .env file")
+		if os.Getenv("CI") == "true" {
+			log.Println("CI mode: skipping .env file")
+			return
+		}
+		log.Printf("Warning: Failed to load .env file: %v", err)
 	}
 }
