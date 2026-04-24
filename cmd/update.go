@@ -231,12 +231,12 @@ func runCreateReportPR() {
 	var report strings.Builder
 
 	report.WriteString("# 📦 Dependency Updates Report\n\n")
-	report.WriteString(fmt.Sprintf("Generated: %s\n\n", entities.GetTimestampedBranchName()))
+	fmt.Fprintf(&report, "Generated: %s\n\n", entities.GetTimestampedBranchName())
 	report.WriteString("---\n\n")
 
 	for _, project := range projects {
-		report.WriteString(fmt.Sprintf("## %s\n\n", project.Name))
-		report.WriteString(fmt.Sprintf("Path: `%s`\n\n", project.Path))
+		fmt.Fprintf(&report, "## %s\n\n", project.Name)
+		fmt.Fprintf(&report, "Path: `%s`\n\n", project.Path)
 
 		if project.GoMod != nil {
 			report.WriteString("### Go Packages\n\n")

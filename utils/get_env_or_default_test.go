@@ -22,10 +22,10 @@ func TestGetEnvOrDefault(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.value != "" {
-				os.Setenv(tt.key, tt.value)
-				defer os.Unsetenv(tt.key)
+				_ = os.Setenv(tt.key, tt.value)
+				defer func() { _ = os.Unsetenv(tt.key) }()
 			} else {
-				os.Unsetenv(tt.key)
+				_ = os.Unsetenv(tt.key)
 			}
 
 			got := GetEnvOrDefault(tt.key, tt.defaultVal)

@@ -46,8 +46,8 @@ func TestLoad_EnvVars(t *testing.T) {
 }
 
 func TestLoad_SSHConfig(t *testing.T) {
-	os.Setenv("SSH_KEY_NAME", "my_key")
-	defer os.Unsetenv("SSH_KEY_NAME")
+	_ = os.Setenv("SSH_KEY_NAME", "my_key")
+	defer func() { _ = os.Unsetenv("SSH_KEY_NAME") }()
 
 	cfg, err := Load()
 	if err != nil {
@@ -59,11 +59,11 @@ func TestLoad_SSHConfig(t *testing.T) {
 }
 
 func TestLoad_ImageConfig(t *testing.T) {
-	os.Setenv("IMAGE_NAME", "my-image")
-	os.Setenv("IMAGE_VERSION", "v1.0.0")
+	_ = os.Setenv("IMAGE_NAME", "my-image")
+	_ = os.Setenv("IMAGE_VERSION", "v1.0.0")
 	defer func() {
-		os.Unsetenv("IMAGE_NAME")
-		os.Unsetenv("IMAGE_VERSION")
+		_ = os.Unsetenv("IMAGE_NAME")
+		_ = os.Unsetenv("IMAGE_VERSION")
 	}()
 
 	cfg, err := Load()
