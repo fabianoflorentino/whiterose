@@ -17,8 +17,11 @@ on:
       skip_tests:
         description: 'Pular testes'
         required: false
-        default: 'false'
-        type: boolean
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
       target:
         description: 'Alvo específico'
         required: false
