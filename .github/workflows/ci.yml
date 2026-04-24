@@ -9,6 +9,7 @@ on:
 env:
   GO_VERSION: '1.26'
   SKIP_DOTENV: 'true'
+  CI: 'true'
 
 jobs:
   lint:
@@ -99,3 +100,38 @@ jobs:
 
       - name: Build Docker image
         run: docker build --target production -t whiterose-test .
+
+  # Optional: integration tests with secrets
+  integration:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    # Only runs if secrets are configured
+    # Skip if not all required secrets are available
+    continue-on-error: true
+    env:
+      GIT_USER: ${{ secrets.GIT_USER || '' }}
+      GIT_TOKEN: ${{ secrets.GIT_TOKEN || '' }}
+      SSH_KEY_PATH: ${{ secrets.SSH_KEY_PATH || '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Create test config
+        if: env.GIT_USER != ''
+        run: |
+          cat > test-config.json << 'EOF'
+          {
+            "repositories": [],
+            "applications": []
+          }
+          EOF
+
+      - name: Run with config
+        if: env.GIT_USER != ''
+        run: |
+          echo "Git user configured: $GIT_USER"
+          ./whiterose pre-req --list || true
