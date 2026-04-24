@@ -13,6 +13,7 @@ func TestNewDockerManager(t *testing.T) {
 	dm := NewDockerManager("/tmp")
 	if dm == nil {
 		t.Error("NewDockerManager() returned nil")
+		return
 	}
 	if dm.workDir != "/tmp" {
 		t.Errorf("workDir = %v, want /tmp", dm.workDir)
