@@ -8,16 +8,16 @@ type ConfigLoader interface {
 }
 
 type RepoInfo struct {
-	URL       string
-	Directory string
+	URL       string `json:"url" yaml:"url"`
+	Directory string `json:"directory" yaml:"directory"`
 }
 
 type AppInfo struct {
-	Name                string
-	Command             string
-	VersionFlag         string
-	RecommendedVersion  string
-	InstallInstructions map[string]string
+	Name                string            `json:"name" yaml:"name"`
+	Command             string            `json:"command" yaml:"command"`
+	VersionFlag         string            `json:"versionFlag" yaml:"versionFlag"`
+	RecommendedVersion  string            `json:"recommendedVersion" yaml:"recommendedVersion"`
+	InstallInstructions map[string]string `json:"installInstructions" yaml:"installInstructions"`
 }
 
 type GitCloner interface {
@@ -42,20 +42,20 @@ type AppChecker interface {
 }
 
 type AppValidation struct {
-	Name               string
-	Command            string
-	IsInstalled        bool
-	CurrentVersion     string
-	RecommendedVersion string
-	IsUpToDate         bool
-	InstallInstruction string
-	OS                 string
+	Name                string
+	Command             string
+	IsInstalled         bool
+	CurrentVersion      string
+	RecommendedVersion  string
+	IsUpToDate          bool
+	InstallInstruction  string
+	OS                  string
 }
 
 type ImageBuilder interface {
 	Build(opts ImageBuildOptions) error
 	Delete(image string) error
-	ListImages(pattern string) error
+	ListImages(pattern string) ([]string, error)
 	FindDockerfiles(root string) ([]string, error)
 }
 
@@ -84,6 +84,21 @@ type Logger interface {
 	Print(v ...interface{})
 	Println(v ...interface{})
 	Printf(format string, v ...interface{})
+}
+
+type VersionLister interface {
+	ListGoVersions() ([]string, error)
+	ListPackageUpdates(path string) ([]PackageUpdate, error)
+}
+
+type PackageUpdate struct {
+	Name           string
+	CurrentVersion string
+	LatestVersion  string
+}
+
+type DockerImageLister interface {
+	ListTags(image string) ([]string, error)
 }
 
 func ToAppInfo(apps []utils.AppInfo) []AppInfo {
