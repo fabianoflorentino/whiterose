@@ -60,7 +60,7 @@ func (vc *VersionChecker) ListGoVersions() error {
 	if err != nil {
 		return fmt.Errorf("failed to fetch Go versions: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -249,7 +249,7 @@ func (vc *VersionChecker) fetchDockerHubTags(image string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		return vc.fetchGHCRTags(image)
@@ -284,7 +284,7 @@ func (vc *VersionChecker) fetchGHCRTags(image string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

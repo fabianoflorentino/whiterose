@@ -26,11 +26,11 @@ func TestLoadOrDefault(t *testing.T) {
 }
 
 func TestLoad_EnvVars(t *testing.T) {
-	os.Setenv("GIT_USER", "test-user")
-	os.Setenv("GIT_TOKEN", "test-token")
+	_ = os.Setenv("GIT_USER", "test-user")
+	_ = os.Setenv("GIT_TOKEN", "test-token")
 	defer func() {
-		os.Unsetenv("GIT_USER")
-		os.Unsetenv("GIT_TOKEN")
+		_ = os.Unsetenv("GIT_USER")
+		_ = os.Unsetenv("GIT_TOKEN")
 	}()
 
 	cfg, err := Load()

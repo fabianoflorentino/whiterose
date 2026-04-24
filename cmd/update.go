@@ -295,13 +295,13 @@ func runCreateReportPR() {
 			fmt.Fprintf(os.Stderr, "Error creating temp file: %v\n", err)
 			return
 		}
-		defer os.Remove(tmpFile.Name())
+		defer func() { _ = os.Remove(tmpFile.Name()) }()
 
 		if _, err := tmpFile.WriteString(report.String()); err != nil {
 			fmt.Fprintf(os.Stderr, "Error writing report: %v\n", err)
 			return
 		}
-		tmpFile.Close()
+		_ = tmpFile.Close()
 
 		branchName := "update/dependency-report-" + strings.ReplaceAll(entities.GetTimestampedBranchName(), " ", "-")
 
