@@ -1,21 +1,4 @@
-// DockerManager provides methods to manage Docker operations within a specified working directory.
-// It supports detecting Dockerfiles and building Docker images using specified build arguments.
-//
-// NewDockerManager(workDir string) *DockerManager:
-//
-//	Creates a new DockerManager instance for the given working directory.
-//
-// DetectDockerFile() ([]string, error):
-//
-//	Recursively searches for Dockerfiles in the working directory.
-//	Returns a slice of paths to found Dockerfiles or an error if none are found.
-//
-// BuildDockerImage(dockerfilePath, imageName string, buildArgs map[string]string) error:
-//
-//	Builds a Docker image using the specified Dockerfile and image name.
-//	Accepts build arguments as a map.
-//	Outputs build progress and duration to stdout/stderr.
-//	Returns an error if the build fails.
+// Package docker provides Docker operations with SOLID principles.
 package docker
 
 import (
@@ -29,120 +12,128 @@ import (
 	"github.com/fabianoflorentino/whiterose/utils"
 )
 
+type DockerClient interface {
+	Build(dockerfile, image string, args []string) error
+	Delete(image string) error
+	ListImages(pattern string) ([]string, error)
+}
+
+type RealDockerClient struct{}
+
+func (c *RealDockerClient) Build(dockerfile, image string, args []string) error {
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func (c *RealDockerClient) Delete(image string) error {
+	cmd := exec.Command("docker", "rmi", image)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	_, err := cmd.CombinedOutput()
+	return err
+}
+
+func (c *RealDockerClient) ListImages(pattern string) ([]string, error) {
+	cmd := exec.Command("docker", "images", "--filter", "reference="+pattern, "--format", "{{.Repository}}:{{.Tag}}")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, err
+	}
+	lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+	var result []string
+	for _, line := range lines {
+		if line != "" {
+			result = append(result, line)
+		}
+	}
+	return result, nil
+}
+
 type DockerManager struct {
-	workDir string
+	workDir      string
+	dockerClient DockerClient
 }
 
-// NewDockerManager creates a new DockerManager instance for the given working directory.
 func NewDockerManager(workDir string) *DockerManager {
-	return &DockerManager{workDir: workDir}
+	return &DockerManager{
+		workDir:      workDir,
+		dockerClient: &RealDockerClient{},
+	}
 }
 
-// DetectDockerFile searches for Dockerfiles in the working directory.
-func (d *DockerManager) DetectDockerFile() ([]string, error) {
-	var dockerfiles []string
+func (dm *DockerManager) WithClient(client DockerClient) *DockerManager {
+	return &DockerManager{
+		workDir:      dm.workDir,
+		dockerClient: client,
+	}
+}
 
-	// Walk the file tree to find Dockerfiles
+func (dm *DockerManager) DetectDockerFile() ([]string, error) {
+	var dockerfiles []string
 	w := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-
 		if !info.IsDir() {
 			filename := strings.ToLower(filepath.Base(path))
 			if filename == "dockerfile" || strings.HasPrefix(filename, "dockerfile.") {
 				dockerfiles = append(dockerfiles, path)
 			}
 		}
-
 		return nil
 	}
-
-	err := filepath.Walk(d.workDir, w)
+	err := filepath.Walk(dm.workDir, w)
 	if err != nil {
 		return dockerfiles, err
 	}
 	if len(dockerfiles) == 0 {
-		return nil, fmt.Errorf("no Dockerfile found in directory %s", d.workDir)
+		return nil, fmt.Errorf("no Dockerfile found in directory %s", dm.workDir)
 	}
-
 	return dockerfiles, nil
 }
 
-// BuildDockerImage builds a Docker image using the specified Dockerfile and image name.
-func (d *DockerManager) BuildDockerImage(dockerfilePath, imageName string, buildArgs map[string]string) error {
+func (dm *DockerManager) BuildDockerImage(dockerfilePath, imageName string, buildArgs map[string]string) error {
 	fmt.Printf("Building Docker image '%s' from Dockerfile at '%s'\n", imageName, dockerfilePath)
 
-	buildContext := "."
-
 	args := []string{"build"}
-
-	// Adiciona build-args antes do contexto
 	for key, value := range buildArgs {
 		args = append(args, "--build-arg", fmt.Sprintf("%s=%s", key, value))
 	}
-
-	var build_target = utils.GetEnvOrDefault("BUILD_TARGET", "development")
-
-	args = append(args, "--progress=plain", "--no-cache", "--target", build_target)
-	args = append(args, "-t", imageName)
-	args = append(args, "-f", dockerfilePath)
-	args = append(args, buildContext)
-
-	cmd := exec.Command("docker", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	fmt.Printf("Running command: %s\n", cmd.String())
+	args = append(args, "--progress=plain", "--no-cache", "--target", utils.GetEnvOrDefault("BUILD_TARGET", "development"))
+	args = append(args, "-t", imageName, "-f", dockerfilePath, ".")
 
 	startTime := time.Now()
-	err := cmd.Run()
+	err := dm.dockerClient.Build(dockerfilePath, imageName, args)
 	duration := time.Since(startTime)
-
 	if err != nil {
 		fmt.Printf("Error building Docker image: %v\n", err)
 		return err
 	}
-
 	fmt.Printf("Docker image '%s' built successfully in %v\n", imageName, duration)
 	return nil
 }
 
-func (d *DockerManager) DeleteDockerImage(imageName string) error {
+func (dm *DockerManager) DeleteDockerImage(imageName string) error {
 	fmt.Printf("Deleting Docker image '%s'\n", imageName)
-
-	cmd := exec.Command("docker", "rmi", imageName)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	fmt.Printf("Running command: %s\n", cmd.String())
-
-	startTime := time.Now()
-	err := cmd.Run()
-	duration := time.Since(startTime)
-
-	if err != nil {
-		fmt.Printf("Error deleting Docker image: %v\n", err)
-		return err
-	}
-
-	fmt.Printf("Docker image '%s' deleted successfully in %v\n", imageName, duration)
-	return nil
+	return dm.dockerClient.Delete(imageName)
 }
 
-func (d *DockerManager) ListDockerImages(imageName string) error {
-	cmd := exec.Command("docker", "image", "list", imageName, "--format", "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.Size}}")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	fmt.Printf("Running command: %s\n", cmd.String())
-
-	err := cmd.Run()
-
+func (dm *DockerManager) ListDockerImages(pattern string) error {
+	fmt.Printf("Listing Docker images matching '%s'\n", pattern)
+	images, err := dm.dockerClient.ListImages(pattern)
 	if err != nil {
-		fmt.Printf("Error listing Docker images: %v\n", err)
+		fmt.Printf("Error listing images: %v\n", err)
 		return err
 	}
-
+	if len(images) == 0 {
+		fmt.Println("No images found matching the pattern.")
+		return nil
+	}
+	fmt.Println("Found images:")
+	for _, img := range images {
+		fmt.Printf("  %s\n", img)
+	}
 	return nil
 }
