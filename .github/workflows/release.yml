@@ -10,13 +10,19 @@ on:
       dry_run:
         description: 'Dry-run mode (skip publishing)'
         required: false
-        default: 'false'
-        type: boolean
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
       prerelease:
         description: 'Mark as pre-release'
         required: false
-        default: 'false'
-        type: boolean
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 env:
   GO_VERSION: '1.26'
@@ -41,20 +47,20 @@ jobs:
         id: validate
         run: |
           VERSION=${{ github.event.inputs.version }}
-          
+
           if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "::error::Invalid version format. Use: v1.2.3"
             exit 1
           fi
-          
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          
+
           if [[ $VERSION == *"-"* ]] || [[ $VERSION == *"rc"* ]]; then
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
           else
             echo "is_prerelease=${{ github.event.inputs.prerelease }}" >> $GITHUB_OUTPUT
           fi
-          
+
           echo "✅ Version validated: $VERSION"
 
       - name: Check if tag exists
@@ -175,9 +181,9 @@ jobs:
         run: |
           cat << 'NOTES' > release-notes.md
           ## Installation
-          
+
           Download the binary for your platform:
-          
+
           | Platform | Architecture | Download |
           |----------|--------------|----------|
           | Linux    | amd64        | whiterose-linux-amd64 |
@@ -185,21 +191,21 @@ jobs:
           | macOS    | amd64        | whiterose-darwin-amd64 |
           | macOS    | arm64        | whiterose-darwin-arm64 |
           | Windows  | amd64        | whiterose-windows-amd64.exe |
-          
+
           ## Verification
-          
+
           Check the checksums.txt file to verify the downloaded binary.
-          
+
           ```bash
           sha256sum -c checksums.txt
           ```
-          
+
           ## Docker Image
-          
+
           Available at: `docker.io/fabianoflorentino/whiterose:$VERSION`
-          
+
           ## What's Changed
-          
+
           See the commit history for this release.
           NOTES
           cat release-notes.md
@@ -219,6 +225,7 @@ jobs:
 
   # ── Build & Push Docker ───────────────────────────────────────────────────────
   docker:
+    environment: DOCKERHUB
     needs: prepare
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.dry_run != 'true' }}
