@@ -1,27 +1,108 @@
 name: Release and Deploy Binary
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
   workflow_dispatch:
     inputs:
+      version:
+        description: 'Version tag (e.g., v1.2.3)'
+        required: true
+        type: string
       dry_run:
-        description: "Dry-run (list without removing)"
+        description: 'Dry-run mode'
         required: false
-        default: "false"
-        type: choice
-        options:
-          - "false"
-          - "true"
+        default: 'false'
+        type: boolean
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  GO_VERSION: '1.26'
+  APP_NAME: whiterose
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.validate.outputs.version }}
+      is_prerelease: ${{ steps.validate.outputs.is_prerelease }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate version format
+        id: validate
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          
+          if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid version format. Use: v1.2.3"
+            exit 1
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          if [[ $VERSION == *"-"* ]] || [[ $VERSION == *"rc"* ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=${{ github.event.inputs.prerelease }}" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "✅ Version validated: $VERSION"
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git tag | grep -q "^${{ steps.validate.outputs.version }}$"; then
+            echo "❌ Tag ${{ steps.validate.outputs.version }} already exists"
+            exit 1
+          fi
+          echo "✅ Tag does not exist, ready to create"
+
+  tag:
+    needs: prepare
+    runs-on: ubuntu-latest
+    if: github.event.inputs.dry_run != 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create tag
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag -a ${{ needs.prepare.outputs.version }} -m "Release ${{ needs.prepare.outputs.version }}"
+          echo "✅ Tag created: ${{ needs.prepare.outputs.version }}"
+
+      - name: Push tag
+        uses: ad-m/github-push-action@master
+        with:
+          tags: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
   build:
+    needs: prepare
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux, windows, darwin]
-        goarch: [amd64]
+        include:
+          - goos: linux
+            goarch: amd64
+            ext: ''
+          - goos: linux
+            goarch: arm64
+            ext: ''
+          - goos: darwin
+            goarch: amd64
+            ext: ''
+          - goos: darwin
+            goarch: arm64
+            ext: ''
+          - goos: windows
+            goarch: amd64
+            ext: '.exe'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,36 +110,158 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Build binary
         run: |
           mkdir -p bin
-          EXT=""
-          if [ "${{ matrix.goos }}" = "windows" ]; then EXT=".exe"; fi
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o bin/whiterose-${{ matrix.goos }}-${{ matrix.goarch }}$EXT main.go
+          OUTPUT="bin/${{ env.APP_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="-s -w -X main.version=${{ needs.prepare.outputs.version }}" -o "$OUTPUT" main.go
+          ls -lh "$OUTPUT"
+
+      - name: Generate checksums
+        run: |
+          cd bin
+          sha256sum * > checksums.txt
+          cat checksums.txt
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
-          name: whiterose-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: bin/whiterose-${{ matrix.goos }}-${{ matrix.goarch }}*
+          name: ${{ env.APP_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: bin/**
+          retention-days: 5
 
   release:
-    needs: build
+    needs: [prepare, build]
     runs-on: ubuntu-latest
+    if: github.event.inputs.dry_run != 'true'
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: bin
+          pattern: ${{ env.APP_NAME }}-*
+          merge-multiple: false
 
       - name: List downloaded files
-        run: ls -lhR bin
+        run: |
+          echo "=== Build artifacts ==="
+          ls -lhR bin
+
+      - name: Create checksums for all binaries
+        run: |
+          cd bin
+          find . -type f -name "*${{ env.APP_NAME }}*" ! -name "checksums.txt" | while read f; do
+            sha256sum "$f" >> checksums.txt
+          done
+          echo "=== All checksums ==="
+          cat checksums.txt
+
+      - name: Create Release Notes
+        id: release-notes
+        run: |
+          VERSION=${{ needs.prepare.outputs.version }}
+          NOTES_FILE=$(mktemp)
+          
+          cat > "$NOTES_FILE" << 'EOF'
+          ## Installation
+          
+          Download the binary for your platform:
+          
+          | Platform | Architecture | Download |
+          |----------|--------------|----------|
+          | Linux    | amd64        | whiterose-linux-amd64 |
+          | Linux    | arm64        | whiterose-linux-arm64 |
+          | macOS    | amd64        | whiterose-darwin-amd64 |
+          | macOS    | arm64        | whiterose-darwin-arm64 |
+          | Windows  | amd64        | whiterose-windows-amd64.exe |
+          
+          ## Verification
+          
+          Check the checksums.txt file to verify the downloaded binary.
+          
+          ```bash
+          sha256sum -c checksums.txt
+          ```
+          
+          ## Docker Image
+          
+          Available at: `docker.io/fabianoflorentino/whiterose:$VERSION`
+          
+          ## What's Changed
+          
+          See the commit history for this release.
+          EOF
+          
+          cat "$NOTES_FILE"
+          echo "notes_file=$NOTES_FILE" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: bin/**
+          tag_name: ${{ needs.prepare.outputs.version }}
+          name: Release ${{ needs.prepare.outputs.version }}
+          body_path: ${{ steps.release-notes.outputs.notes_file }}
+          draft: false
+          prerelease: ${{ needs.prepare.outputs.is_prerelease }}
+          files: |
+            bin/**
+            checksums.txt
+          generate_release_notes: true
         env:
-          GITHUB_TOKEN: ${{ secrets.WHITEROSE_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docker:
+    needs: prepare
+    runs-on: ubuntu-latest
+    if: github.event.inputs.dry_run != 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            fabianoflorentino/whiterose:${{ needs.prepare.outputs.version }}
+            fabianoflorentino/whiterose:latest
+            ghcr.io/fabianoflorentino/whiterose:${{ needs.prepare.outputs.version }}
+            ghcr.io/fabianoflorentino/whiterose:latest
+          build-args: |
+            VERSION=${{ needs.prepare.outputs.version }}
+
+  success:
+    needs: [release, docker]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Success message
+        if: needs.release.result == 'success' && needs.docker.result == 'success'
+        run: |
+          echo "✅ Release ${{ needs.prepare.outputs.version }} completed successfully!"
+          echo "📦 Binary: https://github.com/${{ github.repository }}/releases/tag/${{ needs.prepare.outputs.version }}"
+          echo "🐳 Docker: docker.io/fabianoflorentino/whiterose:${{ needs.prepare.outputs.version }}"
+
+      - name: Failure message
+        if: failure()
+        run: |
+          echo "❌ Release failed. Check the logs for details."

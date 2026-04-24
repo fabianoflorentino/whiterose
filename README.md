@@ -207,6 +207,30 @@ If not set, default values are used.
 └── ...
 ```
 
+## Release
+
+To create a new release:
+
+```bash
+# Via GitHub Actions (recommended)
+# 1. Go to Actions tab
+# 2. Select "Release and Deploy Binary"
+# 3. Click "Run workflow"
+# 4. Enter version tag (e.g., v1.0.0)
+
+# Via command line
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The workflow will automatically:
+1. Validate the version format
+2. Create and push the git tag
+3. Build binaries for all platforms (linux, darwin, windows)
+4. Generate checksums
+5. Create a GitHub Release
+6. Build and push Docker images to Docker Hub and GHCR
+
 ## License
 
 This project is licensed under the MIT License.
