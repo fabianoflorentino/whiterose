@@ -6,23 +6,57 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
 )
 
-type VersionChecker struct{}
+type HTTPClient interface {
+	Get(url string) (*http.Response, error)
+	Do(req *http.Request) (*http.Response, error)
+}
+
+type RealHTTPClient struct{}
+
+func (c *RealHTTPClient) Get(url string) (*http.Response, error) {
+	return http.Get(url)
+}
+
+func (c *RealHTTPClient) Do(req *http.Request) (*http.Response, error) {
+	return http.DefaultClient.Do(req)
+}
+
+type VersionChecker struct {
+	httpClient HTTPClient
+	executor   CommandExecutor
+}
 
 func NewVersionChecker() *VersionChecker {
-	return &VersionChecker{}
+	return &VersionChecker{
+		httpClient: &RealHTTPClient{},
+		executor:   &RealCommandExecutor{},
+	}
+}
+
+func (vc *VersionChecker) WithHTTP(client HTTPClient) *VersionChecker {
+	return &VersionChecker{
+		httpClient: client,
+		executor:   vc.executor,
+	}
+}
+
+func (vc *VersionChecker) WithExecutor(exec CommandExecutor) *VersionChecker {
+	return &VersionChecker{
+		httpClient: vc.httpClient,
+		executor:   exec,
+	}
 }
 
 func (vc *VersionChecker) ListGoVersions() error {
 	fmt.Println("Fetching Go versions...")
 
-	resp, err := http.Get("https://go.dev/dl/?mode=json")
+	resp, err := vc.httpClient.Get("https://go.dev/dl/?mode=json")
 	if err != nil {
 		return fmt.Errorf("failed to fetch Go versions: %w", err)
 	}
@@ -84,9 +118,7 @@ func (vc *VersionChecker) GetCurrentGoVersion(goModPath string) string {
 func (vc *VersionChecker) ListGoLibUpdates(goModPath string) error {
 	fmt.Println("Checking for library updates...")
 
-	cmd := exec.Command("go", "list", "-m", "-u", "all")
-	cmd.Dir = goModPath
-	out, err := cmd.CombinedOutput()
+	out, err := vc.executor.Run("go", "list", "-m", "-u", "all")
 	if err != nil {
 		return fmt.Errorf("failed to list updates: %w", err)
 	}
@@ -114,15 +146,13 @@ func (vc *VersionChecker) ListGoLibUpdates(goModPath string) error {
 func (vc *VersionChecker) UpdatePackages(goModPath string, strategy string, dryRun bool) error {
 	fmt.Println("Updating packages...")
 
-	var cmd *exec.Cmd
+	var out string
+	var err error
 	if dryRun {
-		cmd = exec.Command("go", "get", "-u", "./...", "-dry-run")
+		out, err = vc.executor.Run("go", "get", "-u", "./...", "-dry-run")
 	} else {
-		cmd = exec.Command("go", "get", "-u", "./...")
+		out, err = vc.executor.Run("go", "get", "-u", "./...")
 	}
-	cmd.Dir = goModPath
-
-	out, err := cmd.CombinedOutput()
 	if err != nil {
 		if dryRun {
 			return fmt.Errorf("dry-run failed: %w\n%s", err, out)
@@ -151,10 +181,9 @@ func (vc *VersionChecker) UpdatePackages(goModPath string, strategy string, dryR
 
 	if !dryRun {
 		fmt.Println("\nRunning go mod tidy...")
-		tidy := exec.Command("go", "mod", "tidy")
-		tidy.Dir = goModPath
-		if out, err := tidy.CombinedOutput(); err != nil {
-			return fmt.Errorf("go mod tidy failed: %w\n%s", err, out)
+		tidyOut, tidyErr := vc.executor.Run("go", "mod", "tidy")
+		if tidyErr != nil {
+			return fmt.Errorf("go mod tidy failed: %w\n%s", tidyErr, tidyOut)
 		}
 		fmt.Println("  Done.")
 	}
@@ -216,7 +245,7 @@ func (vc *VersionChecker) fetchDockerHubTags(image string) ([]string, error) {
 		return nil, err
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := vc.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -251,7 +280,7 @@ func (vc *VersionChecker) fetchDockerHubTags(image string) ([]string, error) {
 
 func (vc *VersionChecker) fetchGHCRTags(image string) ([]string, error) {
 	url := fmt.Sprintf("https://ghcr.io/v2/%s/tags/list", image)
-	resp, err := http.Get(url)
+	resp, err := vc.httpClient.Get(url)
 	if err != nil {
 		return nil, err
 	}

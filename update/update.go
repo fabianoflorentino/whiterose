@@ -11,11 +11,24 @@ import (
 )
 
 type UpdateService struct {
-	prBase string
+	prBase   string
+	executor CommandExecutor
 }
 
 func New() *UpdateService {
-	return &UpdateService{prBase: "main"}
+	return &UpdateService{prBase: "main", executor: &RealCommandExecutor{}}
+}
+
+type CommandExecutor interface {
+	Run(cmd string, args ...string) (string, error)
+}
+
+type RealCommandExecutor struct{}
+
+func (e *RealCommandExecutor) Run(cmd string, args ...string) (string, error) {
+	c := exec.Command(cmd, args...)
+	out, err := c.CombinedOutput()
+	return string(out), err
 }
 
 func (s *UpdateService) SetPRBase(base string) {
@@ -281,9 +294,8 @@ func (s *UpdateService) updateGoModFile(path string, version string) error {
 }
 
 func (s *UpdateService) runGoModTidy(projectPath string) error {
-	cmd := exec.Command("go", "mod", "tidy")
-	cmd.Dir = projectPath
-	if out, err := cmd.CombinedOutput(); err != nil {
+	out, err := s.executor.Run("go", "mod", "tidy")
+	if err != nil {
 		return fmt.Errorf("%w: %s", err, out)
 	}
 	return nil
