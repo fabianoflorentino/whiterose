@@ -4,14 +4,14 @@ WORKDIR /whiterose
 
 COPY . .
 
-RUN apk update -y --no-cache \
-  && apk upgrade -y --no-cache \
-  && go mod download \
-  && GOFLAGS="-trimpath" CGO_DISABLED=1 GOARCH=amd64 go build -ldflags="-s -w" -o /usr/local/bin/whiterose .
+RUN apk add --no-cache git && \
+    go mod download && \
+    GOFLAGS="-trimpath" CGO_DISABLED=1 GOARCH=amd64 go build -ldflags="-s -w" -o /usr/local/bin/whiterose .
 
 FROM base AS development
 
-RUN go install github.com/air-verse/air@latest
+RUN go install github.com/air-verse/air@latest && \
+    rm -rf /go/pkg/mod
 
 COPY --from=base /whiterose/.env.example /root/.env
 
