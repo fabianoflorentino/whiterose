@@ -282,3 +282,81 @@ func TestMin(t *testing.T) {
 		}
 	}
 }
+
+func TestLoadUpdateConfig(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "update.yaml")
+
+	config := `projects:
+  - name: test-project
+    path: /tmp/test
+    goMod:
+      updateStrategy: patch
+`
+	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
+		t.Fatalf("failed to create config: %v", err)
+	}
+
+	s := New()
+	projects, err := s.LoadUpdateConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadUpdateConfig() error = %v", err)
+	}
+	if len(projects) != 1 {
+		t.Errorf("len(projects) = %d, want 1", len(projects))
+	}
+	if projects[0].Name != "test-project" {
+		t.Errorf("Name = %v, want test-project", projects[0].Name)
+	}
+}
+
+func TestLoadUpdateConfig_NotFound(t *testing.T) {
+	s := New()
+	_, err := s.LoadUpdateConfig("/nonexistent/config.yaml")
+	if err == nil {
+		t.Error("expected error for nonexistent file")
+	}
+}
+
+func TestCreateBranchAndCommit(t *testing.T) {
+	t.Skip("Requires git repo setup")
+}
+
+func TestVersionChecker_GetCurrentGoVersion(t *testing.T) {
+	vc := NewVersionChecker()
+	tmpDir := t.TempDir()
+	goModPath := filepath.Join(tmpDir, "go.mod")
+
+	if err := os.WriteFile(goModPath, []byte("module test\ngo 1.26.0"), 0644); err != nil {
+		t.Fatalf("failed to create go.mod: %v", err)
+	}
+
+	got := vc.GetCurrentGoVersion(tmpDir)
+	if got != "1.26.0" {
+		t.Errorf("GetCurrentGoVersion() = %v, want 1.26.0", got)
+	}
+}
+
+func TestVersionChecker_GetCurrentGoVersion_NotFound(t *testing.T) {
+	vc := NewVersionChecker()
+	got := vc.GetCurrentGoVersion("/nonexistent")
+	if got != "" {
+		t.Errorf("GetCurrentGoVersion() = %v, want empty", got)
+	}
+}
+
+func TestVersionChecker_ListGoLibUpdates(t *testing.T) {
+	t.Skip("Requires network access")
+}
+
+func TestVersionChecker_UpdatePackages(t *testing.T) {
+	t.Skip("Requires network and git setup")
+}
+
+func TestVersionChecker_ListDockerUpdates(t *testing.T) {
+	t.Skip("Requires network access")
+}
+
+func TestVersionChecker_ListGoVersions(t *testing.T) {
+	t.Skip("Requires network access")
+}

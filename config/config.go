@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -53,7 +54,7 @@ func Load() (*Config, error) {
 	v.BindEnv("ssh.keyName", "SSH_KEY_NAME")
 	v.BindEnv("image.name", "IMAGE_NAME")
 	v.BindEnv("image.version", "IMAGE_VERSION")
-	v.BindEnv("repo.path", "CONFIG_FILE")
+	v.BindEnv("repo.path", "CONFIG_FILE", "WHITEROSE_REPO_PATH")
 
 	v.SetConfigName("whiterose")
 	v.SetConfigType("yaml")
@@ -99,10 +100,10 @@ func LoadOrDefault() *Config {
 }
 
 func GetConfigPath() string {
-	if path := viper.GetString("repo.path"); path != "" {
+	if path := os.Getenv("CONFIG_FILE"); path != "" {
 		return path
 	}
-	if path := viper.GetString("CONFIG_FILE"); path != "" {
+	if path := viper.GetString("repo.path"); path != "" {
 		return path
 	}
 	return ".config.json"
