@@ -250,7 +250,7 @@ func runCreateReportPR() {
 				lines := strings.Split(string(out), "\n")
 				for _, line := range lines {
 					if strings.Contains(line, "->") && !strings.HasPrefix(line, "go:") {
-						report.WriteString(fmt.Sprintf("- `%s`\n", line))
+						fmt.Fprintf(&report, "- `%s`\n", line)
 						hasUpdates = true
 					}
 				}
@@ -262,12 +262,12 @@ func runCreateReportPR() {
 
 		if project.GoVersion != nil {
 			report.WriteString("### Go Version\n\n")
-			report.WriteString(fmt.Sprintf("Current: %s\n\n", checker.GetCurrentGoVersion(project.Path)))
+			fmt.Fprintf(&report, "Current: %s\n\n", checker.GetCurrentGoVersion(project.Path))
 		}
 
 		if project.DockerImage != nil {
 			report.WriteString("### Docker Image\n\n")
-			report.WriteString(fmt.Sprintf("Current: `%s`\n\n", project.DockerImage.Base))
+			fmt.Fprintf(&report, "Current: `%s`\n\n", project.DockerImage.Base)
 		}
 
 		report.WriteString("---\n\n")
