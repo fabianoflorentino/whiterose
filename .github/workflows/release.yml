@@ -135,12 +135,6 @@ jobs:
             -o "$OUTPUT" main.go
           ls -lh "$OUTPUT"
 
-      - name: Generate checksums
-        run: |
-          cd bin
-          sha256sum * > checksums.txt
-          cat checksums.txt
-
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
@@ -166,14 +160,20 @@ jobs:
           echo "=== Build artifacts ==="
           ls -lhR bin
 
-      - name: Generate checksums
+      - name: Normalize artifacts
         run: |
-          cd bin
-          for f in *; do
-            if [ -f "$f" ] && [ "$f" != "checksums.txt" ]; then
-              sha256sum "$f" >> checksums.txt
+          mkdir -p release
+          for dir in bin/*/; do
+            if [ -f "${dir}"* ]; then
+              cp "${dir}"* release/ 2>/dev/null || true
             fi
           done
+          ls -lh release
+
+      - name: Generate checksums
+        run: |
+          cd release
+          sha256sum * > checksums.txt
           echo "=== All checksums ==="
           cat checksums.txt
 
@@ -218,14 +218,13 @@ jobs:
           body_path: release-notes.md
           draft: false
           prerelease: ${{ needs.prepare.outputs.is_prerelease }}
-          files: bin/**
+          files: release/**
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ── Build & Push Docker ───────────────────────────────────────────────────────
   docker:
-    environment: DOCKERHUB
     needs: prepare
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.dry_run != 'true' }}
