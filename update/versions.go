@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -66,6 +68,17 @@ func (vc *VersionChecker) ListGoVersions() error {
 	}
 
 	return nil
+}
+
+func (vc *VersionChecker) GetCurrentGoVersion(goModPath string) string {
+	content, _ := os.ReadFile(filepath.Join(goModPath, "go.mod"))
+	lines := strings.Split(string(content), "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(line, "go ") {
+			return strings.TrimSpace(strings.TrimPrefix(line, "go "))
+		}
+	}
+	return ""
 }
 
 func (vc *VersionChecker) ListGoLibUpdates(goModPath string) error {
