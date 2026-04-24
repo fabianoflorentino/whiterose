@@ -98,6 +98,57 @@ func (vc *VersionChecker) ListGoLibUpdates(goModPath string) error {
 	return nil
 }
 
+func (vc *VersionChecker) UpdatePackages(goModPath string, strategy string, dryRun bool) error {
+	fmt.Println("Updating packages...")
+
+	var cmd *exec.Cmd
+	if dryRun {
+		cmd = exec.Command("go", "get", "-u", "./...", "-dry-run")
+	} else {
+		cmd = exec.Command("go", "get", "-u", "./...")
+	}
+	cmd.Dir = goModPath
+
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		if dryRun {
+			return fmt.Errorf("dry-run failed: %w\n%s", err, out)
+		}
+		return fmt.Errorf("failed to update packages: %w\n%s", err, out)
+	}
+
+	if dryRun {
+		fmt.Println("\nPackages that would be updated (dry-run):")
+	} else {
+		fmt.Println("\nPackages updated:")
+	}
+
+	lines := strings.Split(string(out), "\n")
+	updated := false
+	for _, line := range lines {
+		if strings.HasPrefix(line, "go get:") || strings.Contains(line, "->") {
+			fmt.Printf("  %s\n", line)
+			updated = true
+		}
+	}
+
+	if !updated {
+		fmt.Println("  No packages to update")
+	}
+
+	if !dryRun {
+		fmt.Println("\nRunning go mod tidy...")
+		tidy := exec.Command("go", "mod", "tidy")
+		tidy.Dir = goModPath
+		if out, err := tidy.CombinedOutput(); err != nil {
+			return fmt.Errorf("go mod tidy failed: %w\n%s", err, out)
+		}
+		fmt.Println("  Done.")
+	}
+
+	return nil
+}
+
 func (vc *VersionChecker) ListDockerUpdates(imageName string) error {
 	fmt.Printf("Fetching Docker image versions for %s...\n", imageName)
 

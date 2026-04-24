@@ -18,6 +18,7 @@ var (
 	updateGoMod       bool
 	updateGoVersion   bool
 	updateDockerImage bool
+	updatePackages    bool
 	updateMajor       bool
 	updateConfigPath  string
 	updateList        bool
@@ -35,6 +36,7 @@ Supported updates:
 - --go-mod: Update go.mod dependencies
 - --go-version: Update Go version in go.mod
 - --docker-image: Update base Docker image
+- --packages: Update Go packages to latest versions
 
 Update strategies:
 - Minor/patch: Automatic (no confirmation)
@@ -53,8 +55,8 @@ The command will:
 			return
 		}
 
-		if !updateGoMod && !updateGoVersion && !updateDockerImage {
-			fmt.Println("Error: specify at least one of --go-mod, --go-version, or --docker-image")
+		if !updateGoMod && !updateGoVersion && !updateDockerImage && !updatePackages {
+			fmt.Println("Error: specify at least one of --go-mod, --go-version, --docker-image, or --packages")
 			os.Exit(1)
 		}
 
@@ -112,6 +114,16 @@ The command will:
 					continue
 				}
 				changes = append(changes, "Updated Docker base image")
+			}
+
+			if updatePackages && project.GoMod != nil {
+				checker := update.NewVersionChecker()
+				err = checker.UpdatePackages(project.Path, "patch", updateDryRun)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error updating packages: %v\n", err)
+					continue
+				}
+				changes = append(changes, "Updated Go packages")
 			}
 
 			if len(changes) > 0 {
@@ -207,9 +219,10 @@ func init() {
 	updateCmd.Flags().BoolVarP(&updateGoMod, "go-mod", "g", false, "Update/List go.mod dependencies")
 	updateCmd.Flags().BoolVarP(&updateGoVersion, "go-version", "v", false, "Update/List Go version")
 	updateCmd.Flags().BoolVarP(&updateDockerImage, "docker-image", "d", false, "Update/List Docker base image")
+	updateCmd.Flags().BoolVarP(&updatePackages, "packages", "p", false, "Update Go packages to latest versions")
 	updateCmd.Flags().BoolVarP(&updateMajor, "major", "m", false, "Update major version (requires confirmation)")
 	updateCmd.Flags().BoolVarP(&updateList, "list", "l", false, "List available updates instead of updating")
-	updateCmd.Flags().BoolVarP(&updatePR, "pr", "p", false, "Create pull request after pushing (requires gh cli)")
+	updateCmd.Flags().BoolVarP(&updatePR, "pr", "r", false, "Create pull request after pushing (requires gh cli)")
 	updateCmd.Flags().BoolVarP(&updateDryRun, "dry-run", "n", false, "Show what would be updated without making changes")
 	updateCmd.Flags().StringVarP(&updateConfigPath, "config", "c", "", "Path to update config file")
 	updateCmd.Flags().StringVarP(&updateBase, "base", "b", "main", "Base branch for PR")
