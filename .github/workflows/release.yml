@@ -158,16 +158,12 @@ jobs:
       - name: List downloaded files
         run: |
           echo "=== Build artifacts ==="
-          ls -lhR bin
+          find bin -type f -ls
 
       - name: Normalize artifacts
         run: |
           mkdir -p release
-          for dir in bin/*/; do
-            if [ -f "${dir}"* ]; then
-              cp "${dir}"* release/ 2>/dev/null || true
-            fi
-          done
+          find bin -type f -exec cp {} release/ \; 2>/dev/null || true
           ls -lh release
 
       - name: Generate checksums
