@@ -1,0 +1,86 @@
+name: Whiterose Project Template
+
+on:
+  workflow_call:
+    inputs:
+      config_path:
+        required: true
+        type: string
+      update_packages:
+        required: false
+        type: boolean
+        default: true
+      update_go_version:
+        required: false
+        type: boolean
+        default: false
+      update_docker:
+        required: false
+        type: boolean
+        default: false
+      dry_run:
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      GH_TOKEN:
+        required: false
+
+env:
+  GO_VERSION: '1.26'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: List available updates
+        run: go run . update --list --config ${{ inputs.config_path }}
+
+  update:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Update packages
+        if: inputs.update_packages
+        run: |
+          ARGS="--packages --config ${{ inputs.config_path }}"
+          [[ "${{ inputs.dry_run }}" == "true" ]] && ARGS="$ARGS --dry-run"
+          go run . update $ARGS
+
+      - name: Update Go version
+        if: inputs.update_go_version
+        run: |
+          ARGS="--go-version --config ${{ inputs.config_path }}"
+          [[ "${{ inputs.dry_run }}" == "true" ]] && ARGS="$ARGS --dry-run"
+          go run . update $ARGS
+
+      - name: Update Docker images
+        if: inputs.update_docker
+        run: |
+          ARGS="--docker-image --config ${{ inputs.config_path }}"
+          [[ "${{ inputs.dry_run }}" == "true" ]] && ARGS="$ARGS --dry-run"
+          go run . update $ARGS
+
+      - name: Create PR
+        if: inputs.dry_run != 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GH_TOKEN || github.token }}
+          commit-message: 'chore: automated updates'
+          title: '⬆️ Automated dependency updates'
+          body: |
+            Automated updates via whiterose.
+          branch: whiterose/updates
+          delete-branch: true
