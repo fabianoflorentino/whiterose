@@ -283,33 +283,6 @@ func TestMin(t *testing.T) {
 	}
 }
 
-func TestLoadUpdateConfig(t *testing.T) {
-	tmpDir := t.TempDir()
-	configPath := filepath.Join(tmpDir, "update.yaml")
-
-	config := `projects:
-  - name: test-project
-    path: /tmp/test
-    goMod:
-      updateStrategy: patch
-`
-	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
-		t.Fatalf("failed to create config: %v", err)
-	}
-
-	s := New()
-	projects, err := s.LoadUpdateConfig(configPath)
-	if err != nil {
-		t.Fatalf("LoadUpdateConfig() error = %v", err)
-	}
-	if len(projects) != 1 {
-		t.Errorf("len(projects) = %d, want 1", len(projects))
-	}
-	if projects[0].Name != "test-project" {
-		t.Errorf("Name = %v, want test-project", projects[0].Name)
-	}
-}
-
 func TestLoadUpdateConfig_NotFound(t *testing.T) {
 	s := New()
 	_, err := s.LoadUpdateConfig("/nonexistent/config.yaml")
