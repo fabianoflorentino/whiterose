@@ -225,6 +225,7 @@ jobs:
 
   # ── Build & Push Docker ───────────────────────────────────────────────────────
   docker:
+    environment: DOCKERHUB
     needs: prepare
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.dry_run != 'true' }}
