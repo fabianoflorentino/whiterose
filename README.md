@@ -155,18 +155,34 @@ Use `whiterose [command] --help` for more information about each command and its
 
 ## Environment Variables
 
-Create a `.env` file in your home directory (required):
+Whiterose uses environment variables and/or a config file for configuration. Priority: flags > env vars > config file > defaults.
 
-- `GIT_USER`: Git username for HTTPS authentication
-- `GIT_TOKEN`: Git token/password for HTTPS authentication
-- `CONFIG_FILE`: Path to the configuration file (default: `$HOME/.config.json`)
-- `SSH_KEY_PATH`: Path to your SSH key directory (default: `$HOME/.ssh`)
-- `SSH_KEY_NAME`: Name of your SSH private key (default: `id_rsa`)
-- `IMAGE_NAME`: Name of the Docker image to build (default: `my_app:latest`)
-- `IMAGE_VERSION`: Version of the Docker image to build (default: `latest`)
-- `DOCKERFILE_PATH`: Path to the Dockerfile (default: `$PWD/Dockerfile`)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GIT_USER` | Git username for HTTPS | - |
+| `GIT_TOKEN` | Git token/password | - |
+| `CONFIG_FILE` | Path to config file | `.config.json` |
+| `SSH_KEY_PATH` | SSH key directory | `~/.ssh` |
+| `SSH_KEY_NAME` | SSH key name | `id_rsa` |
+| `IMAGE_NAME` | Docker image name | `my_app` |
+| `IMAGE_VERSION` | Docker image version | `latest` |
 
-If not set, default values are used.
+Optional config file in `$HOME/.config/whiterose.yaml`:
+
+```yaml
+git:
+  user: "your-user"
+  token: "your-token"
+  base: "main"
+
+ssh:
+  keyPath: "~/.ssh"
+  keyName: "id_rsa"
+
+image:
+  name: "my_app"
+  version: "latest"
+```
 
 ## Project Structure
 
